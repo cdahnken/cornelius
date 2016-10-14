@@ -145,16 +145,22 @@ void readConfigFromFile(char* filename) {
 }
 
 void printConfig() {
-    cout << "Number of sites          : " << nsites << endl;
-    cout << "Number of up electrons   : " << neup << endl;
-    cout << "Number of down electrons : " << nedo << endl;
-    cout << "Number of hoppings       : " << nhoppings << endl;
+    cout << "---------------------------" << endl; 
+    cout << "       CORNELIUS           " << endl;
+    cout << "---------------------------" << endl; 
+    cout << "Number of sites            : " << nsites << endl;
+    cout << "Number of up electrons     : " << neup << endl;
+    cout << "Number of down electrons   : " << nedo << endl;
+    cout << "Number of hoppings         : " << nhoppings << endl;
     for (int i = 0; i < nhoppings; i++) {
-        cout << "hopping " << i << " : " << hopping[i][0] << " " << hopping[i][1] << " " << hoppingvalue[i] << endl;
+        cout << "hopping " << i << "    : " << hopping[i][0] << " " << hopping[i][1] << " " << hoppingvalue[i] << endl;
     }
     for (int i = 0; i < nsites; i++) {
         cout << "interaction/mu_up_mu_down " << i << " : " << interaction[i] << " " << mu_up[i] << " " << mu_do[i] << endl;
     }
+    cout << "Size of up hopping matrix  :" << nStatesPerSpin(nsites, neup) << endl;
+    cout << "Size of down hopping matrix:" << nStatesPerSpin(nsites, nedo) << endl;
+    cout << "Size of diagonal matrix    :" << nStatesPerSpin(nsites, neup)*nStatesPerSpin(nsites, nedo) << endl;
 }
 
 void printState(int s, int ns) {
