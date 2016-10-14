@@ -1,9 +1,32 @@
 /*
  * File:   main.c
- * Author: Chris Dahnken
+ * Author: Chris Dahnken (dahnken<at>gmx.net)
  *
  * Created on August 18, 2010, 8:36 AM
  */
+
+/*
+ * Cornelius
+ * ---------
+ * 2016/10/14
+ * A thread-parallel versatile Lanczos diagonalization for the 
+ * Hubbard model.
+ * 
+ * The application allows for each hopping, chemical potential and interaction 
+ * for each spin to be individually configured. Hence open, periodic and
+ * antiperiodic boundary conditions, 2-band, 3-band and periodic Anderson models
+ * are easily calculated.  
+ * 
+ * The Hamiltonian is represented by to spin-separate matrices for the 
+ * hopping and one matrix diagonal for the interaction and chemical potentials.
+ * The memory consumption is, thus, pretty small compared to a full/dense 
+ * representation of the Hamiltonian. A sparse implementation of the 
+ * hopping matrices is considered.
+ * 
+ * The diagonalization of tridiagonal Lanczos-matrix is comfortably done 
+ * with GSL, which should be available on most Linux systems
+ */
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,10 +63,13 @@ int maxiter = 200;
 // convergence criterion
 double convCrit = 0.000000000001;
 // hamilton matrix for spin up (hoppings)
+// this matrix is of size nstatesup^2
 double** mup;
 // hamilton matrix for spin down (hoppings)
+// this matrix is of size nstatesdo^2
 double** mdo;
 // hamilton matrix diagonal (chemical potential and interaction)
+// this matrix is of size nstatesup*nstatesdo
 double* mdia;
 long blockup = 30;
 // number of hoppings
