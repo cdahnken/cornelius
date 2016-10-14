@@ -643,7 +643,6 @@ void lanczos() {
         printf("Eigenvalue = %g\n", d[0]);
         // ------------ SolverTriDiagonal end
 
-
         printf("Difference %e - %e = %e\n", d[0], dold, fabs(d[0] - dold));
         if (j > 5) {
             if ((fabs(d[0] - dold) < convCrit)) {
