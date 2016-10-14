@@ -17,6 +17,10 @@
  * antiperiodic boundary conditions, 2-band, 3-band and periodic Anderson models
  * are easily calculated.  
  * 
+ * Very little thought was spent to improve the performance, since only a 
+ * smart way of verifying ground state energies for modes cluster sizes was
+ * needed. 
+ * 
  * The Hamiltonian is represented by to spin-separate matrices for the 
  * hopping and one matrix diagonal for the interaction and chemical potentials.
  * The memory consumption is, thus, pretty small compared to a full/dense 
@@ -159,9 +163,9 @@ long nStatesPerSpin(int nsites, int nelec) {
 }
 
 void printConfig() {
-    cout << "---------------------------" << endl; 
-    cout << "       CORNELIUS           " << endl;
-    cout << "---------------------------" << endl; 
+    cout << "--------------------------------------------------------" << endl; 
+    cout << "                       CORNELIUS                        " << endl;
+    cout << "--------------------------------------------------------" << endl; 
     cout << "Number of sites            : " << nsites << endl;
     cout << "Number of up electrons     : " << neup << endl;
     cout << "Number of down electrons   : " << nedo << endl;
@@ -479,8 +483,8 @@ void QPlusHTimesC1(double* &q, double* &c) {
         }
     }
 }
-// emploiting spin symmetry
 
+// emploiting spin symmetry
 void QPlusHTimesC2(double* &q, double* &c) {
 #pragma omp parallel for
     for (long i = 0; i < nstatesup; i++) {
