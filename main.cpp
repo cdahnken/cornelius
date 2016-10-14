@@ -1,6 +1,6 @@
 /*
  * File:   main.c
- * Author: chris
+ * Author: Chris Dahnken
  *
  * Created on August 18, 2010, 8:36 AM
  */
@@ -15,27 +15,48 @@
 #include <mm_malloc.h>
 #include <iostream>
 #include <fstream>
+// number of sites
 int nsites = 12;
+// number of up electrons
 int neup = 6;
+// number of down electrons
 int nedo = 6;
+// array for the up-states
 int* sup;
+// array for the down states
 int* sdo;
+// interaction strength
 double U = 0;
+// chemical potential (both spins the same)
 double mu = 0;
+// number of states = nstatesup*nstatesdo
 long nstates;
+// number of states with spin up
 long nstatesup;
+// number of states with spin down
 long nstatesdo;
+// maximum number of iterations
 int maxiter = 200;
+// convergence criterion
 double convCrit = 0.000000000001;
+// hamilton matrix for spin up (hoppings)
 double** mup;
+// hamilton matrix for spin down (hoppings)
 double** mdo;
+// hamilton matrix diagonal (chemical potential and interaction)
 double* mdia;
 long blockup = 30;
+// number of hoppings
 int nhoppings;
+// site-to-site hopping matrix
 int** hopping;
+// hopping values
 double* hoppingvalue;
+// spin-up chemical potential for each site
 double* mu_up;
+// spin-down chemical potential for each site
 double* mu_do;
+// interaction for each site
 double* interaction;
 
 #define LDEBUG
@@ -499,7 +520,6 @@ void QPlusHTimesC3(double* &q, double* &c) {
 void QPlusHTimesC4(double* &q, double* &c) {
     long time1, time2;
 
-
     printf("MatVec Hopping Down: ");
     time1 = timeInSec();
 #pragma omp parallel for
@@ -565,6 +585,7 @@ void lanczos() {
     c = new double[nstates];
     q = new double[nstates];
     long time1, time2;
+    
 #pragma omp parallel for
     for (long i = 0; i < nstates; i++) {
         c[i] = 1.0 / sqrt((double) nstates);
