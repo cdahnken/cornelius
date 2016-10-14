@@ -144,6 +144,20 @@ void readConfigFromFile(char* filename) {
     cfile.close();
 }
 
+// Faculty function - long type should suffice
+long faculty(long i) {
+    if (i == 1 || i == 0) {
+        return 1;
+    } else {
+        return faculty(i - 1) * i;
+    }
+}
+
+// Compute the number of states per spin
+long nStatesPerSpin(int nsites, int nelec) {
+    return faculty(nsites) / faculty(nelec) / faculty(nsites - nelec);
+}
+
 void printConfig() {
     cout << "---------------------------" << endl; 
     cout << "       CORNELIUS           " << endl;
@@ -158,9 +172,9 @@ void printConfig() {
     for (int i = 0; i < nsites; i++) {
         cout << "interaction/mu_up_mu_down " << i << " : " << interaction[i] << " " << mu_up[i] << " " << mu_do[i] << endl;
     }
-    cout << "Size of up hopping matrix  :" << nStatesPerSpin(nsites, neup) << endl;
-    cout << "Size of down hopping matrix:" << nStatesPerSpin(nsites, nedo) << endl;
-    cout << "Size of diagonal matrix    :" << nStatesPerSpin(nsites, neup)*nStatesPerSpin(nsites, nedo) << endl;
+    cout << "Size of up hopping matrix  : " << nStatesPerSpin(nsites, neup) << endl;
+    cout << "Size of down hopping matrix: " << nStatesPerSpin(nsites, nedo) << endl;
+    cout << "Size of diagonal matrix    : " << nStatesPerSpin(nsites, neup)*nStatesPerSpin(nsites, nedo) << endl;
 }
 
 void printState(int s, int ns) {
@@ -181,19 +195,6 @@ long timeInSec(void) {
     return (long) (tv.tv_sec * 1000 + tv.tv_usec / 1000.0);
 }
 
-// Faculty function - long type should suffice
-long faculty(long i) {
-    if (i == 1 || i == 0) {
-        return 1;
-    } else {
-        return faculty(i - 1) * i;
-    }
-}
-
-// Compute the number of states per spin
-long nStatesPerSpin(int nsites, int nelec) {
-    return faculty(nsites) / faculty(nelec) / faculty(nsites - nelec);
-}
 
 // Get a bit in an integer
 int inline getBitAt(int st, int pos) {
