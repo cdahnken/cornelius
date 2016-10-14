@@ -55,8 +55,6 @@
  * 
  * 
  */
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -209,16 +207,24 @@ long timeInSec(void) {
     return (long) (tv.tv_sec * 1000 + tv.tv_usec / 1000.0);
 }
 
+// getBitAt
 // Get a bit in an integer
 int inline getBitAt(int st, int pos) {
     return ((st & (1 << pos)) >> pos);
 }
 
-// Popcount function - sum all the bits in an integer
+// popcount 
+// Sum all the bits in an integer.
+// This is offloaded to an intrinsic function calling
+// the respective assembly instruction.
 int inline popcount(int i) {
     return __builtin_popcount(i);
 }
 
+// setupBasis
+// Fills an arrays with numbers between 0 and 2^L-1
+// having nelec number of bits (which correspond to 
+// electrons).
 void setupBasis(int*& basis, int nsites, int nelec) {
     int bmin = (1 << nelec) - 1;
     int bmax = bmin << (nsites - nelec);
@@ -232,6 +238,11 @@ void setupBasis(int*& basis, int nsites, int nelec) {
     printf("set up %d states\n", n);
 }
 
+// matrixelementU
+// computes the number of double occupations between
+// up and down states u and d. 
+// This can be done a lot quicker, but has not been a 
+// bottle neck at this time.
 double matrixelementU(int u, int d) {
     double ret = 0;
     for (int i = 0; i < nsites; i++)
