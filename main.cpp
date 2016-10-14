@@ -128,12 +128,15 @@ void readConfigFromFile(char* filename) {
     // allocate fields depending on the number of hoppings:
     hopping = new int*[nhoppings];
     hoppingvalue = new double[nhoppings];
+    // allocate the hoppings
     for (int i = 0; i < nhoppings; i++) {
         hopping[i] = new int[2];
     }
+    // read in all the hoppings
     for (int i = 0; i < nhoppings; i++) {
         cfile >> hopping[i][0] >> hopping[i][1] >> hoppingvalue[i];
     }
+    // read in interactions and chemical potential for up and down
     for (int i = 0; i < nsites; i++) {
         cfile >> interaction[i] >> mu_up[i] >> mu_do[i];
     }
