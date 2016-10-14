@@ -110,9 +110,10 @@ double* interaction;
 
 #define LDEBUG
 
-
 using namespace std;
 
+// Read in the configuration file and set up 
+// the arrays.
 void readConfigFromFile(char* filename) {
     ifstream cfile(filename);
     // read line 1 - number of sites
@@ -174,6 +175,7 @@ long timeInSec(void) {
     return (long) (tv.tv_sec * 1000 + tv.tv_usec / 1000.0);
 }
 
+// Faculty function - long type should suffice
 long faculty(long i) {
     if (i == 1 || i == 0) {
         return 1;
@@ -182,14 +184,17 @@ long faculty(long i) {
     }
 }
 
+// Compute the number of states per spin
 long nStatesPerSpin(int nsites, int nelec) {
     return faculty(nsites) / faculty(nelec) / faculty(nsites - nelec);
 }
 
+// Get a bit in an integer
 int inline getBitAt(int st, int pos) {
     return ((st & (1 << pos)) >> pos);
 }
 
+// Popcount function - sum all the bits in an integer
 int inline popcount(int i) {
     return __builtin_popcount(i);
 }
