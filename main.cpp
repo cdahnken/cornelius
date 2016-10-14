@@ -209,7 +209,6 @@ long timeInSec(void) {
     return (long) (tv.tv_sec * 1000 + tv.tv_usec / 1000.0);
 }
 
-
 // Get a bit in an integer
 int inline getBitAt(int st, int pos) {
     return ((st & (1 << pos)) >> pos);
