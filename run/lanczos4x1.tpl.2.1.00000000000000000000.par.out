@@ -1,0 +1,84 @@
+Number of sites          : 4
+Number of up electrons   : 2
+Number of down electrons : 2
+Number of hoppings       : 3
+hopping 0 : 0 1 -1
+hopping 1 : 1 2 -1
+hopping 2 : 2 3 -1
+interaction/mu_up_mu_down 0 : 2 -1 -1
+interaction/mu_up_mu_down 1 : 2 -1 -1
+interaction/mu_up_mu_down 2 : 2 -1 -1
+interaction/mu_up_mu_down 3 : 2 -1 -1
+blockup = 30
+set up 6 states
+set up 6 states
+Setup: 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[1]=1.632993e+00
+Eigenvalue = 6.94197e-310
+Difference 6.941971e-310 - 1.000000e+07 = 1.000000e+07
+Iteration time in sec 1
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[2]=2.629956e+00
+Eigenvalue = -6
+Difference -6.000000e+00 - 6.941971e-310 = 6.000000e+00
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[3]=1.848262e+00
+Eigenvalue = -6.64357
+Difference -6.643568e+00 - -6.000000e+00 = 6.435678e-01
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[4]=1.962095e+00
+Eigenvalue = -6.85017
+Difference -6.850170e+00 - -6.643568e+00 = 2.066022e-01
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[5]=2.082115e+00
+Eigenvalue = -6.8716
+Difference -6.871604e+00 - -6.850170e+00 = 2.143355e-02
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[6]=1.482958e+00
+Eigenvalue = -6.87491
+Difference -6.874906e+00 - -6.871604e+00 = 3.301983e-03
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[7]=1.408704e-01
+Eigenvalue = -6.87586
+Difference -6.875856e+00 - -6.874906e+00 = 9.502648e-04
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[8]=4.423443e-12
+Eigenvalue = -6.87594
+Difference -6.875943e+00 - -6.875856e+00 = 8.696333e-05
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[9]=7.113692e-02
+Eigenvalue = -6.87594
+Difference -6.875943e+00 - -6.875943e+00 = 6.504091e-08
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[10]=1.409970e+00
+Eigenvalue = -6.87594
+Difference -6.875943e+00 - -6.875943e+00 = 1.154632e-14

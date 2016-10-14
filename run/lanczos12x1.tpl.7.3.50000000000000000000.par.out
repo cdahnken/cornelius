@@ -1,0 +1,555 @@
+Number of sites          : 12
+Number of up electrons   : 6
+Number of down electrons : 6
+Number of hoppings       : 11
+hopping 0 : 0 1 -1
+hopping 1 : 1 2 -1
+hopping 2 : 2 3 -1
+hopping 3 : 3 4 -1
+hopping 4 : 4 5 -1
+hopping 5 : 5 6 -1
+hopping 6 : 6 7 -1
+hopping 7 : 7 8 -1
+hopping 8 : 8 9 -1
+hopping 9 : 9 10 -1
+hopping 10 : 10 11 -1
+interaction/mu_up_mu_down 0 : 7 -3.5 -3.5
+interaction/mu_up_mu_down 1 : 7 -3.5 -3.5
+interaction/mu_up_mu_down 2 : 7 -3.5 -3.5
+interaction/mu_up_mu_down 3 : 7 -3.5 -3.5
+interaction/mu_up_mu_down 4 : 7 -3.5 -3.5
+interaction/mu_up_mu_down 5 : 7 -3.5 -3.5
+interaction/mu_up_mu_down 6 : 7 -3.5 -3.5
+interaction/mu_up_mu_down 7 : 7 -3.5 -3.5
+interaction/mu_up_mu_down 8 : 7 -3.5 -3.5
+interaction/mu_up_mu_down 9 : 7 -3.5 -3.5
+interaction/mu_up_mu_down 10 : 7 -3.5 -3.5
+interaction/mu_up_mu_down 11 : 7 -3.5 -3.5
+blockup = 30
+set up 924 states
+set up 924 states
+Setup: 270
+MatVec Hopping Down: 393
+MatVec Hopping Up: 383
+MatVec Diagonal: 2
+beta[1]=6.748737e+00
+Eigenvalue = 0
+Difference 0.000000e+00 - 1.000000e+07 = 1.000000e+07
+Iteration time in sec 781
+MatVec Hopping Down: 389
+MatVec Hopping Up: 398
+MatVec Diagonal: 2
+beta[2]=9.222525e+00
+Eigenvalue = -33
+Difference -3.300000e+01 - 0.000000e+00 = 3.300000e+01
+Iteration time in sec 795
+MatVec Hopping Down: 388
+MatVec Hopping Up: 397
+MatVec Diagonal: 2
+beta[3]=1.098676e+01
+Eigenvalue = -38.1168
+Difference -3.811677e+01 - -3.300000e+01 = 5.116774e+00
+Iteration time in sec 792
+MatVec Hopping Down: 386
+MatVec Hopping Up: 391
+MatVec Diagonal: 2
+beta[4]=1.237167e+01
+Eigenvalue = -40.8238
+Difference -4.082379e+01 - -3.811677e+01 = 2.707015e+00
+Iteration time in sec 785
+MatVec Hopping Down: 394
+MatVec Hopping Up: 387
+MatVec Diagonal: 2
+beta[5]=1.354330e+01
+Eigenvalue = -42.526
+Difference -4.252598e+01 - -4.082379e+01 = 1.702188e+00
+Iteration time in sec 788
+MatVec Hopping Down: 393
+MatVec Hopping Up: 388
+MatVec Diagonal: 2
+beta[6]=1.556398e+01
+Eigenvalue = -43.7282
+Difference -4.372822e+01 - -4.252598e+01 = 1.202242e+00
+Iteration time in sec 789
+MatVec Hopping Down: 390
+MatVec Hopping Up: 397
+MatVec Diagonal: 2
+beta[7]=8.154544e+00
+Eigenvalue = -44.6722
+Difference -4.467219e+01 - -4.372822e+01 = 9.439697e-01
+Iteration time in sec 793
+MatVec Hopping Down: 385
+MatVec Hopping Up: 398
+MatVec Diagonal: 2
+beta[8]=1.188714e+01
+Eigenvalue = -45.6777
+Difference -4.567769e+01 - -4.467219e+01 = 1.005506e+00
+Iteration time in sec 791
+MatVec Hopping Down: 386
+MatVec Hopping Up: 396
+MatVec Diagonal: 2
+beta[9]=1.396770e+01
+Eigenvalue = -45.8863
+Difference -4.588626e+01 - -4.567769e+01 = 2.085646e-01
+Iteration time in sec 789
+MatVec Hopping Down: 394
+MatVec Hopping Up: 388
+MatVec Diagonal: 2
+beta[10]=1.341821e+01
+Eigenvalue = -45.9592
+Difference -4.595920e+01 - -4.588626e+01 = 7.294100e-02
+Iteration time in sec 789
+MatVec Hopping Down: 392
+MatVec Hopping Up: 390
+MatVec Diagonal: 2
+beta[11]=1.243403e+01
+Eigenvalue = -46.0045
+Difference -4.600452e+01 - -4.595920e+01 = 4.532225e-02
+Iteration time in sec 790
+MatVec Hopping Down: 390
+MatVec Hopping Up: 397
+MatVec Diagonal: 2
+beta[12]=1.233304e+01
+Eigenvalue = -46.0434
+Difference -4.604339e+01 - -4.600452e+01 = 3.886931e-02
+Iteration time in sec 794
+MatVec Hopping Down: 387
+MatVec Hopping Up: 398
+MatVec Diagonal: 2
+beta[13]=1.232617e+01
+Eigenvalue = -46.0784
+Difference -4.607841e+01 - -4.604339e+01 = 3.501535e-02
+Iteration time in sec 792
+MatVec Hopping Down: 385
+MatVec Hopping Up: 393
+MatVec Diagonal: 1
+beta[14]=1.334554e+01
+Eigenvalue = -46.1105
+Difference -4.611046e+01 - -4.607841e+01 = 3.205532e-02
+Iteration time in sec 785
+MatVec Hopping Down: 394
+MatVec Hopping Up: 387
+MatVec Diagonal: 2
+beta[15]=1.066728e+01
+Eigenvalue = -46.1369
+Difference -4.613692e+01 - -4.611046e+01 = 2.645495e-02
+Iteration time in sec 789
+MatVec Hopping Down: 395
+MatVec Hopping Up: 389
+MatVec Diagonal: 2
+beta[16]=1.326033e+01
+Eigenvalue = -46.1575
+Difference -4.615751e+01 - -4.613692e+01 = 2.058815e-02
+Iteration time in sec 792
+MatVec Hopping Down: 390
+MatVec Hopping Up: 396
+MatVec Diagonal: 2
+beta[17]=1.284012e+01
+Eigenvalue = -46.1653
+Difference -4.616531e+01 - -4.615751e+01 = 7.806481e-03
+Iteration time in sec 794
+MatVec Hopping Down: 504
+MatVec Hopping Up: 628
+MatVec Diagonal: 2
+beta[18]=1.241271e+01
+Eigenvalue = -46.1707
+Difference -4.617066e+01 - -4.616531e+01 = 5.345192e-03
+Iteration time in sec 1140
+MatVec Hopping Down: 612
+MatVec Hopping Up: 573
+MatVec Diagonal: 2
+beta[19]=1.269920e+01
+Eigenvalue = -46.1759
+Difference -4.617594e+01 - -4.617066e+01 = 5.285307e-03
+Iteration time in sec 1196
+MatVec Hopping Down: 385
+MatVec Hopping Up: 398
+MatVec Diagonal: 2
+beta[20]=1.224148e+01
+Eigenvalue = -46.181
+Difference -4.618103e+01 - -4.617594e+01 = 5.087599e-03
+Iteration time in sec 791
+MatVec Hopping Down: 393
+MatVec Hopping Up: 396
+MatVec Diagonal: 2
+beta[21]=1.184896e+01
+Eigenvalue = -46.1852
+Difference -4.618523e+01 - -4.618103e+01 = 4.204940e-03
+Iteration time in sec 796
+MatVec Hopping Down: 386
+MatVec Hopping Up: 387
+MatVec Diagonal: 2
+beta[22]=1.253776e+01
+Eigenvalue = -46.1881
+Difference -4.618812e+01 - -4.618523e+01 = 2.884797e-03
+Iteration time in sec 781
+MatVec Hopping Down: 394
+MatVec Hopping Up: 391
+MatVec Diagonal: 2
+beta[23]=1.218805e+01
+Eigenvalue = -46.1898
+Difference -4.618983e+01 - -4.618812e+01 = 1.707532e-03
+Iteration time in sec 792
+MatVec Hopping Down: 394
+MatVec Hopping Up: 387
+MatVec Diagonal: 2
+beta[24]=1.372818e+01
+Eigenvalue = -46.1909
+Difference -4.619088e+01 - -4.618983e+01 = 1.054293e-03
+Iteration time in sec 789
+MatVec Hopping Down: 385
+MatVec Hopping Up: 396
+MatVec Diagonal: 2
+beta[25]=1.217396e+01
+Eigenvalue = -46.1916
+Difference -4.619156e+01 - -4.619088e+01 = 6.813924e-04
+Iteration time in sec 789
+MatVec Hopping Down: 389
+MatVec Hopping Up: 399
+MatVec Diagonal: 2
+beta[26]=1.166425e+01
+Eigenvalue = -46.1923
+Difference -4.619229e+01 - -4.619156e+01 = 7.249024e-04
+Iteration time in sec 795
+MatVec Hopping Down: 385
+MatVec Hopping Up: 391
+MatVec Diagonal: 2
+beta[27]=1.206661e+01
+Eigenvalue = -46.1929
+Difference -4.619291e+01 - -4.619229e+01 = 6.193473e-04
+Iteration time in sec 784
+MatVec Hopping Down: 393
+MatVec Hopping Up: 397
+MatVec Diagonal: 2
+beta[28]=1.260446e+01
+Eigenvalue = -46.1933
+Difference -4.619328e+01 - -4.619291e+01 = 3.736198e-04
+Iteration time in sec 798
+MatVec Hopping Down: 398
+MatVec Hopping Up: 387
+MatVec Diagonal: 2
+beta[29]=1.272415e+01
+Eigenvalue = -46.1935
+Difference -4.619349e+01 - -4.619328e+01 = 2.090841e-04
+Iteration time in sec 792
+MatVec Hopping Down: 386
+MatVec Hopping Up: 396
+MatVec Diagonal: 2
+beta[30]=1.299102e+01
+Eigenvalue = -46.1936
+Difference -4.619363e+01 - -4.619349e+01 = 1.358240e-04
+Iteration time in sec 790
+MatVec Hopping Down: 385
+MatVec Hopping Up: 403
+MatVec Diagonal: 2
+beta[31]=1.207257e+01
+Eigenvalue = -46.1937
+Difference -4.619373e+01 - -4.619363e+01 = 1.027523e-04
+Iteration time in sec 796
+MatVec Hopping Down: 384
+MatVec Hopping Up: 388
+MatVec Diagonal: 2
+beta[32]=1.232077e+01
+Eigenvalue = -46.1938
+Difference -4.619382e+01 - -4.619373e+01 = 9.588633e-05
+Iteration time in sec 780
+MatVec Hopping Down: 393
+MatVec Hopping Up: 387
+MatVec Diagonal: 2
+beta[33]=1.172874e+01
+Eigenvalue = -46.1939
+Difference -4.619391e+01 - -4.619382e+01 = 8.502025e-05
+Iteration time in sec 788
+MatVec Hopping Down: 406
+MatVec Hopping Up: 398
+MatVec Diagonal: 2
+beta[34]=1.268174e+01
+Eigenvalue = -46.194
+Difference -4.619398e+01 - -4.619391e+01 = 6.777756e-05
+Iteration time in sec 812
+MatVec Hopping Down: 386
+MatVec Hopping Up: 396
+MatVec Diagonal: 2
+beta[35]=1.319595e+01
+Eigenvalue = -46.194
+Difference -4.619401e+01 - -4.619398e+01 = 3.801588e-05
+Iteration time in sec 789
+MatVec Hopping Down: 386
+MatVec Hopping Up: 402
+MatVec Diagonal: 2
+beta[36]=1.241151e+01
+Eigenvalue = -46.194
+Difference -4.619404e+01 - -4.619401e+01 = 2.384599e-05
+Iteration time in sec 796
+MatVec Hopping Down: 386
+MatVec Hopping Up: 387
+MatVec Diagonal: 2
+beta[37]=1.184468e+01
+Eigenvalue = -46.1941
+Difference -4.619406e+01 - -4.619404e+01 = 1.988974e-05
+Iteration time in sec 780
+MatVec Hopping Down: 393
+MatVec Hopping Up: 388
+MatVec Diagonal: 2
+beta[38]=1.236075e+01
+Eigenvalue = -46.1941
+Difference -4.619408e+01 - -4.619406e+01 = 1.670421e-05
+Iteration time in sec 789
+MatVec Hopping Down: 389
+MatVec Hopping Up: 397
+MatVec Diagonal: 2
+beta[39]=1.201321e+01
+Eigenvalue = -46.1941
+Difference -4.619409e+01 - -4.619408e+01 = 1.150125e-05
+Iteration time in sec 794
+MatVec Hopping Down: 390
+MatVec Hopping Up: 395
+MatVec Diagonal: 2
+beta[40]=1.256881e+01
+Eigenvalue = -46.1941
+Difference -4.619409e+01 - -4.619409e+01 = 7.246558e-06
+Iteration time in sec 794
+MatVec Hopping Down: 386
+MatVec Hopping Up: 392
+MatVec Diagonal: 2
+beta[41]=1.239922e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619409e+01 = 3.919988e-06
+Iteration time in sec 785
+MatVec Hopping Down: 394
+MatVec Hopping Up: 388
+MatVec Diagonal: 2
+beta[42]=1.258857e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 2.262856e-06
+Iteration time in sec 790
+MatVec Hopping Down: 393
+MatVec Hopping Up: 388
+MatVec Diagonal: 2
+beta[43]=1.204232e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 1.399982e-06
+Iteration time in sec 789
+MatVec Hopping Down: 389
+MatVec Hopping Up: 398
+MatVec Diagonal: 2
+beta[44]=1.172732e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 1.068875e-06
+Iteration time in sec 795
+MatVec Hopping Down: 385
+MatVec Hopping Up: 397
+MatVec Diagonal: 2
+beta[45]=1.219153e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 7.322040e-07
+Iteration time in sec 790
+MatVec Hopping Down: 385
+MatVec Hopping Up: 396
+MatVec Diagonal: 2
+beta[46]=1.230708e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 3.880264e-07
+Iteration time in sec 790
+MatVec Hopping Down: 394
+MatVec Hopping Up: 388
+MatVec Diagonal: 2
+beta[47]=1.243467e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 2.065489e-07
+Iteration time in sec 789
+MatVec Hopping Down: 393
+MatVec Hopping Up: 387
+MatVec Diagonal: 2
+beta[48]=1.252137e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 1.180421e-07
+Iteration time in sec 789
+MatVec Hopping Down: 387
+MatVec Hopping Up: 398
+MatVec Diagonal: 2
+beta[49]=1.226447e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 7.877314e-08
+Iteration time in sec 793
+MatVec Hopping Down: 385
+MatVec Hopping Up: 396
+MatVec Diagonal: 2
+beta[50]=1.210028e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 5.908579e-08
+Iteration time in sec 790
+MatVec Hopping Down: 385
+MatVec Hopping Up: 393
+MatVec Diagonal: 2
+beta[51]=1.192254e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 4.163698e-08
+Iteration time in sec 785
+MatVec Hopping Down: 394
+MatVec Hopping Up: 387
+MatVec Diagonal: 2
+beta[52]=1.196550e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 2.597398e-08
+Iteration time in sec 790
+MatVec Hopping Down: 396
+MatVec Hopping Up: 387
+MatVec Diagonal: 2
+beta[53]=1.260210e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 1.342597e-08
+Iteration time in sec 792
+MatVec Hopping Down: 389
+MatVec Hopping Up: 398
+MatVec Diagonal: 2
+beta[54]=1.274311e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 6.932630e-09
+Iteration time in sec 795
+MatVec Hopping Down: 397
+MatVec Hopping Up: 431
+MatVec Diagonal: 1
+beta[55]=1.223485e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 4.694144e-09
+Iteration time in sec 837
+MatVec Hopping Down: 385
+MatVec Hopping Up: 392
+MatVec Diagonal: 2
+beta[56]=1.186829e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 3.788081e-09
+Iteration time in sec 786
+MatVec Hopping Down: 394
+MatVec Hopping Up: 390
+MatVec Diagonal: 2
+beta[57]=1.218847e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 2.839606e-09
+Iteration time in sec 792
+MatVec Hopping Down: 394
+MatVec Hopping Up: 388
+MatVec Diagonal: 2
+beta[58]=1.227800e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 1.628237e-09
+Iteration time in sec 789
+MatVec Hopping Down: 392
+MatVec Hopping Up: 398
+MatVec Diagonal: 2
+beta[59]=1.219022e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 8.690435e-10
+Iteration time in sec 799
+MatVec Hopping Down: 385
+MatVec Hopping Up: 397
+MatVec Diagonal: 2
+beta[60]=1.271004e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 5.140706e-10
+Iteration time in sec 790
+MatVec Hopping Down: 385
+MatVec Hopping Up: 393
+MatVec Diagonal: 2
+beta[61]=1.221876e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 3.204192e-10
+Iteration time in sec 787
+MatVec Hopping Down: 394
+MatVec Hopping Up: 388
+MatVec Diagonal: 2
+beta[62]=1.224500e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 2.448743e-10
+Iteration time in sec 791
+MatVec Hopping Down: 390
+MatVec Hopping Up: 550
+MatVec Diagonal: 2
+beta[63]=1.215723e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 1.790781e-10
+Iteration time in sec 949
+MatVec Hopping Down: 390
+MatVec Hopping Up: 397
+MatVec Diagonal: 2
+beta[64]=1.214358e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 1.109015e-10
+Iteration time in sec 796
+MatVec Hopping Down: 389
+MatVec Hopping Up: 396
+MatVec Diagonal: 2
+beta[65]=1.228432e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 6.351542e-11
+Iteration time in sec 795
+MatVec Hopping Down: 465
+MatVec Hopping Up: 561
+MatVec Diagonal: 2
+beta[66]=1.231107e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 3.834799e-11
+Iteration time in sec 1034
+MatVec Hopping Down: 386
+MatVec Hopping Up: 388
+MatVec Diagonal: 2
+beta[67]=1.262287e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 2.525979e-11
+Iteration time in sec 782
+MatVec Hopping Down: 513
+MatVec Hopping Up: 392
+MatVec Diagonal: 2
+beta[68]=1.250218e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 1.672618e-11
+Iteration time in sec 914
+MatVec Hopping Down: 438
+MatVec Hopping Up: 388
+MatVec Diagonal: 2
+beta[69]=1.125384e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 1.127631e-11
+Iteration time in sec 835
+MatVec Hopping Down: 394
+MatVec Hopping Up: 387
+MatVec Diagonal: 2
+beta[70]=1.231711e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 7.489120e-12
+Iteration time in sec 790
+MatVec Hopping Down: 393
+MatVec Hopping Up: 397
+MatVec Diagonal: 2
+beta[71]=1.256454e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 3.502976e-12
+Iteration time in sec 799
+MatVec Hopping Down: 386
+MatVec Hopping Up: 396
+MatVec Diagonal: 2
+beta[72]=1.207815e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 1.925571e-12
+Iteration time in sec 792
+MatVec Hopping Down: 385
+MatVec Hopping Up: 393
+MatVec Diagonal: 2
+beta[73]=1.228874e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 1.080025e-12
+Iteration time in sec 788
+MatVec Hopping Down: 393
+MatVec Hopping Up: 388
+MatVec Diagonal: 2
+beta[74]=1.221221e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 1.108447e-12
+Iteration time in sec 790
+MatVec Hopping Down: 393
+MatVec Hopping Up: 387
+MatVec Diagonal: 2
+beta[75]=1.193090e+01
+Eigenvalue = -46.1941
+Difference -4.619410e+01 - -4.619410e+01 = 5.613288e-13

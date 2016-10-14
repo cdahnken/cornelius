@@ -1,0 +1,98 @@
+Number of sites          : 4
+Number of up electrons   : 2
+Number of down electrons : 2
+Number of hoppings       : 3
+hopping 0 : 0 1 -1
+hopping 1 : 1 2 -1
+hopping 2 : 2 3 -1
+interaction/mu_up_mu_down 0 : 6 -3 -3
+interaction/mu_up_mu_down 1 : 6 -3 -3
+interaction/mu_up_mu_down 2 : 6 -3 -3
+interaction/mu_up_mu_down 3 : 6 -3 -3
+blockup = 30
+set up 6 states
+set up 6 states
+Setup: 1
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[1]=3.651484e+00
+Eigenvalue = 6.93281e-310
+Difference 6.932809e-310 - 1.000000e+07 = 1.000000e+07
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[2]=5.399691e+00
+Eigenvalue = -10
+Difference -1.000000e+01 - 6.932809e-310 = 1.000000e+01
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[3]=1.681716e+00
+Eigenvalue = -12.1895
+Difference -1.218955e+01 - -1.000000e+01 = 2.189545e+00
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[4]=4.020666e+00
+Eigenvalue = -13.3478
+Difference -1.334777e+01 - -1.218955e+01 = 1.158228e+00
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[5]=4.653936e+00
+Eigenvalue = -13.3937
+Difference -1.339365e+01 - -1.334777e+01 = 4.587874e-02
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[6]=1.702779e+00
+Eigenvalue = -13.4094
+Difference -1.340943e+01 - -1.339365e+01 = 1.577332e-02
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[7]=1.959601e+00
+Eigenvalue = -13.4291
+Difference -1.342908e+01 - -1.340943e+01 = 1.965474e-02
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[8]=5.649195e+00
+Eigenvalue = -13.4313
+Difference -1.343132e+01 - -1.342908e+01 = 2.237718e-03
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[9]=1.139907e+00
+Eigenvalue = -13.4315
+Difference -1.343152e+01 - -1.343132e+01 = 2.063584e-04
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[10]=8.197704e-14
+Eigenvalue = -13.4319
+Difference -1.343191e+01 - -1.343152e+01 = 3.890075e-04
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[11]=5.788247e+00
+Eigenvalue = -13.4319
+Difference -1.343194e+01 - -1.343191e+01 = 2.295170e-05
+Iteration time in sec 0
+MatVec Hopping Down: 0
+MatVec Hopping Up: 0
+MatVec Diagonal: 0
+beta[12]=2.402251e+00
+Eigenvalue = -13.4319
+Difference -1.343194e+01 - -1.343194e+01 = 7.105427e-15
