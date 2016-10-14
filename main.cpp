@@ -12,6 +12,8 @@
  * A thread-parallel versatile Lanczos diagonalization for the 
  * Hubbard model.
  * 
+ * 
+ * 
  * The application allows for each hopping, chemical potential and interaction 
  * for each spin to be individually configured. Hence open, periodic and
  * antiperiodic boundary conditions, 2-band, 3-band and periodic Anderson models
