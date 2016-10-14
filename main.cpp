@@ -253,8 +253,6 @@ inline double comsign2(int r, int a, int b) {
     return ret;
 }
 
-
-
 // 2D
 double matrixelementT(int l, int r) {
     double tmp = 0;
@@ -264,10 +262,7 @@ double matrixelementT(int l, int r) {
     int re;
     int s1;
     int s2;
-    //        cout << "left  ";
-    //        printState(l,nsites);
-    //        cout << "right ";
-    //        printState(r,nsites);
+
     for (int i = 0; i < nhoppings; i++) {
         int n = hopping[i][0];
         int m = hopping[i][1];
