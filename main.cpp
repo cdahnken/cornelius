@@ -170,7 +170,7 @@ void printConfig() {
         cout << "hopping " << i << "    : " << hopping[i][0] << " " << hopping[i][1] << " " << hoppingvalue[i] << endl;
     }
     for (int i = 0; i < nsites; i++) {
-        cout << "interaction/mu_up_mu_down " << i << " : " << interaction[i] << " " << mu_up[i] << " " << mu_do[i] << endl;
+        cout << "interaction/mu_up/mu_down " << i << " : " << interaction[i] << " " << mu_up[i] << " " << mu_do[i] << endl;
     }
     cout << "Size of up hopping matrix  : " << nStatesPerSpin(nsites, neup) << endl;
     cout << "Size of down hopping matrix: " << nStatesPerSpin(nsites, nedo) << endl;
@@ -250,12 +250,6 @@ inline double comsign2(int r, int a, int b) {
 
     unsigned int mask = ((1 << h) - 1)-((1 << (l + 1)) - 1);
     double ret = -(((popcount(mask & r) % 2) << 1) - 1);
-    //    cout<< "sites  ";
-    //    cout<< a<<" "<<b<<endl;
-    //    cout<< " mask ";
-    //    printState(mask, nsites);
-    //    cout<< "sign ";
-    //    cout << ret<<endl;
     return ret;
 }
 
