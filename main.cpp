@@ -171,14 +171,22 @@ void printConfig() {
     cout << "Number of down electrons   : " << nedo << endl;
     cout << "Number of hoppings         : " << nhoppings << endl;
     for (int i = 0; i < nhoppings; i++) {
-        cout << "hopping " << i << "    : " << hopping[i][0] << " " << hopping[i][1] << " " << hoppingvalue[i] << endl;
+        cout << "hopping " << i << "    : " 
+                << hopping[i][0] << " " << hopping[i][1] 
+                << " " << hoppingvalue[i] << endl;
     }
     for (int i = 0; i < nsites; i++) {
-        cout << "interaction/mu_up/mu_down " << i << " : " << interaction[i] << " " << mu_up[i] << " " << mu_do[i] << endl;
+        cout << "interaction/mu_up/mu_down " 
+                << i << " : " << interaction[i] << " " 
+                << mu_up[i] << " " << mu_do[i] << endl;
     }
-    cout << "Size of up hopping matrix  : " << nStatesPerSpin(nsites, neup) << endl;
-    cout << "Size of down hopping matrix: " << nStatesPerSpin(nsites, nedo) << endl;
-    cout << "Size of diagonal matrix    : " << nStatesPerSpin(nsites, neup)*nStatesPerSpin(nsites, nedo) << endl;
+    cout << "Size of up hopping matrix  : " 
+            << nStatesPerSpin(nsites, neup) << endl;
+    cout << "Size of down hopping matrix: " << nStatesPerSpin(nsites, nedo) 
+            << endl;
+    cout << "Size of diagonal matrix    : " 
+            << nStatesPerSpin(nsites, neup)*nStatesPerSpin(nsites, nedo) 
+            << endl;
 }
 
 void printState(int s, int ns) {
@@ -257,7 +265,6 @@ inline double comsign2(int r, int a, int b) {
     return ret;
 }
 
-// 2D
 double matrixelementT(int l, int r) {
     double tmp = 0;
     int n;
