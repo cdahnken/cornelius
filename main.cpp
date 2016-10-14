@@ -21,10 +21,33 @@
  * hopping and one matrix diagonal for the interaction and chemical potentials.
  * The memory consumption is, thus, pretty small compared to a full/dense 
  * representation of the Hamiltonian. A sparse implementation of the 
- * hopping matrices is considered.
+ * hopping matrices is considered as a development target.
+ * 
+ * Currently, only the ground state energy is computed. Calculation of the 
+ * ground state vector is considered as a development target.
  * 
  * The diagonalization of tridiagonal Lanczos-matrix is comfortably done 
- * with GSL, which should be available on most Linux systems
+ * with GSL, which should be available on most Linux systems.
+ * 
+ * Input file configuration:
+ * The input file in the following format is accepted:
+ * 
+ * <number of sites>
+ * <number of up electrons> <number of down electrons>
+ * <number of hoppings>
+ * <from site> <to site> <hopping value> 
+ * <from site> <to site> <hopping value> 
+ * ...
+ * <from site> <to site> <hopping value> 
+ * <interaction site 1> <chemical potential site 1 up> <chemical potential site 1 up>
+ * <interaction site 2> <chemical potential site 2 up> <chemical potential site 2 up>
+ * ...
+ * <interaction site nsites> <chemical potential site nsites up> <chemical potential site nsites up>
+ * 
+ * Comments can be placed after the last in number of a give line and at
+ * the end of the file.
+ * 
+ * 
  */
 
 
