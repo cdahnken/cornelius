@@ -1,0 +1,11 @@
+TODO
+----
+1. Performance improvements
+The matrices are currently multiplied with the Lanczos vectors in a 
+kronecker-like fashion, saving a lot of unnecessary work. For a 4x4 systems
+each of the up and down hopping matrices is still of a side length of ~12k,
+which is clearly the bottle neck. Each matrix is sparse (couple of %) filling,
+so there is great potential.
+
+2. Ground state vector calculation
+Currently only the ground state energy is computed. 
