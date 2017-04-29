@@ -958,7 +958,7 @@ int main(int argc, char** argv) {
     printConfig();
     printf("blockup = %ld\n", blockup);
     init();
-    lanczos2();
+    lanczos();
     return (EXIT_SUCCESS);
 }
 

@@ -30,8 +30,9 @@
           <runcommandpicklistitem>"${OUTPUT_PATH}" lanczos4x3.par
 </runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" lanczos4x3.par</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" /home/chris/NetBeansProjects/ReferenceLanczos08_2D/conf/lanczos4x3.par</runcommandpicklistitem>
         </runcommandpicklist>
-        <runcommand>"${OUTPUT_PATH}" lanczos4x3.par</runcommand>
+        <runcommand>"${OUTPUT_PATH}" /home/chris/NetBeansProjects/ReferenceLanczos08_2D/conf/lanczos4x3.par</runcommand>
         <rundir></rundir>
         <buildfirst>true</buildfirst>
         <terminal-type>0</terminal-type>
