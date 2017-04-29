@@ -9,3 +9,5 @@ so there is great potential.
 
 2. Ground state vector calculation
 Currently only the ground state energy is computed. 
+
+3. Random number generation is flawed for larger than 48

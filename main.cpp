@@ -503,7 +503,7 @@ void QPlusHTimesC1(double* &q, double* &c) {
     }
 }
 
-// emploiting spin symmetry
+// exploiting spin symmetry
 void QPlusHTimesC2(double* &q, double* &c) {
 #pragma omp parallel for
     for (long i = 0; i < nstatesup; i++) {
