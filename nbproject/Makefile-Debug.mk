@@ -42,8 +42,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=-mpopcnt
-CXXFLAGS=-mpopcnt
+CCFLAGS=-mpopcnt -fopenmp
+CXXFLAGS=-mpopcnt -fopenmp
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -60,7 +60,7 @@ LDLIBSOPTIONS=-lgsl -lgslcblas
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/referencelanczos08_2d: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/referencelanczos08_2d ${OBJECTFILES} ${LDLIBSOPTIONS}
+	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/referencelanczos08_2d ${OBJECTFILES} ${LDLIBSOPTIONS} -fopenmp
 
 ${OBJECTDIR}/main.o: main.cpp 
 	${MKDIR} -p ${OBJECTDIR}

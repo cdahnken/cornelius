@@ -649,7 +649,7 @@ void QPlusHTimesC4(double* &q, double* &c) {
     printf("%ld\n", time2 - time1);
 }
 
-void solvetridiag(double* gse, double* gsv, double* alpha, double* beta, int nIterations){
+void solvetridiag(double &gse, double* &gsv, double* &alpha, double* &beta, int nIterations){
         gsl_matrix *mm = gsl_matrix_alloc(nIterations, nIterations);
 
         for (int i = 0; i < nIterations; i++) {
@@ -681,12 +681,12 @@ void solvetridiag(double* gse, double* gsv, double* alpha, double* beta, int nIt
         double* d = new double[nIterations];
 //        for (int i = 0; i < nIterations; i++)
 //            d[i] = gsl_vector_get(eval, i);
-        *gse=gsl_vector_get(eval,0);
+        gse=gsl_vector_get(eval,0);
 //        gsl_vector_view v= gsl_matrix_column(evec,0);
         for(int i=0;i< nIterations;i++)
             gsv[i]=gsl_matrix_get(evec,0,i);
         gsl_matrix_free(mm);
-        printf("Eigenvalue = %g\n", *gse);
+        printf("Eigenvalue = %g\n", gse);
         // ------------ SolverTriDiagonal end
         delete(d);
 
@@ -750,13 +750,14 @@ void lanczos2() {
 
         // ------------ SolverTriDiagonal begin
         evec=new double[nIterations];
-        solvetridiag(&dnew,evec,alpha,beta,nIterations);
+        solvetridiag(dnew,evec,alpha,beta,nIterations);
         // -------------- Tridiag solver end
         printf("Difference %e - %e = %e\n", dnew, dold, fabs(dnew - dold));
         if (j > 5) {
             if ((fabs(dnew - dold) < convCrit)) {
                 break;
             }
+            dold=dnew;
             free(evec);
         }
         
@@ -957,7 +958,7 @@ int main(int argc, char** argv) {
     printConfig();
     printf("blockup = %ld\n", blockup);
     init();
-    lanczos();
+    lanczos2();
     return (EXIT_SUCCESS);
 }
 

@@ -40,13 +40,14 @@
       </toolsSet>
       <compileType>
         <ccTool>
-          <commandLine>-mpopcnt</commandLine>
+          <commandLine>-mpopcnt -fopenmp</commandLine>
         </ccTool>
         <linkerTool>
           <linkerLibItems>
             <linkerLibLibItem>gsl</linkerLibLibItem>
             <linkerLibLibItem>gslcblas</linkerLibLibItem>
           </linkerLibItems>
+          <commandLine>-fopenmp</commandLine>
         </linkerTool>
       </compileType>
       <item path="LICENSE" ex="false" tool="3" flavor2="0">
