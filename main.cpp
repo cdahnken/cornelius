@@ -688,6 +688,8 @@ void solvetridiag(double &gse, double* &gsv, double* &alpha, double* &beta, int 
         gsl_matrix_free(mm);
         printf("Eigenvalue = %g\n", gse);
         // ------------ SolverTriDiagonal end
+        gsl_vector_free(eval);
+        gsl_matrix_free(evec);
         delete(d);
 
 }
@@ -958,7 +960,7 @@ int main(int argc, char** argv) {
     printConfig();
     printf("blockup = %ld\n", blockup);
     init();
-    lanczos();
+    lanczos2();
     return (EXIT_SUCCESS);
 }
 
