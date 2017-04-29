@@ -649,6 +649,130 @@ void QPlusHTimesC4(double* &q, double* &c) {
     printf("%ld\n", time2 - time1);
 }
 
+void solvetridiag(double* gse, double* gsv, double* alpha, double* beta, int nIterations){
+        gsl_matrix *mm = gsl_matrix_alloc(nIterations, nIterations);
+
+        for (int i = 0; i < nIterations; i++) {
+            for (int j = 0; j < nIterations; j++) {
+                gsl_matrix_set(mm, i, j, 0);
+            }
+        }
+
+        for (int i = 0; i < nIterations; i++) {
+            gsl_matrix_set(mm, i, i, alpha[i]);
+        }
+
+        for (int i = 1; i < nIterations; i++) {
+            gsl_matrix_set(mm, i - 1, i, beta[i - 1]);
+            gsl_matrix_set(mm, i, i - 1, beta[i - 1]);
+        }
+
+        gsl_vector *eval = gsl_vector_alloc(nIterations);
+        gsl_matrix *evec = gsl_matrix_alloc(nIterations, nIterations);
+
+        gsl_eigen_symmv_workspace *w =
+                gsl_eigen_symmv_alloc(nIterations);
+
+        gsl_eigen_symmv(mm, eval, evec, w);
+        gsl_eigen_symmv_free(w);
+        gsl_eigen_symmv_sort(eval, evec, GSL_EIGEN_SORT_VAL_ASC);
+        
+
+        double* d = new double[nIterations];
+//        for (int i = 0; i < nIterations; i++)
+//            d[i] = gsl_vector_get(eval, i);
+        *gse=gsl_vector_get(eval,0);
+//        gsl_vector_view v= gsl_matrix_column(evec,0);
+        for(int i=0;i< nIterations;i++)
+            gsv[i]=gsl_matrix_get(evec,0,i);
+        gsl_matrix_free(mm);
+        printf("Eigenvalue = %g\n", *gse);
+        // ------------ SolverTriDiagonal end
+        delete(d);
+
+}
+
+
+void lanczos2() {
+    int j;
+    int nIterations = 0;
+    double* c;
+    double* q;
+    double dnew;
+    double* evec;
+    double dold = 10000000;
+    double* beta = new double[maxiter];
+    double* alpha = new double[maxiter];
+    c = new double[nstates];
+    q = new double[nstates];
+    long time1, time2;
+    
+#pragma omp parallel for
+    for (long i = 0; i < nstates; i++) {
+        c[i] = 1.0 / sqrt((double) nstates);
+        q[i] = 0;
+    }
+    beta[0] = 0;
+    j = 0;
+
+    for (int n = 0; n < maxiter - 1; n++) {
+        time1 = timeInSec();
+
+        if (j != 0) {
+#pragma omp parallel for
+            for (long i = 0; i < nstates; i++) {
+                double t = c[i];
+                c[i] = q[i] / beta[j];
+                q[i] = -beta[j] * t;
+            }
+        }
+        QPlusHTimesC3(q, c);
+        j++;
+
+        double tmp = 0;
+#pragma omp parallel for reduction(+:tmp)
+        for (long i = 0; i < nstates; i++) {
+            tmp += c[i] * q[i];
+        }
+        alpha[j] = tmp;
+#pragma omp parallel for
+        for (long i = 0; i < nstates; i++) {
+            q[i] = q[i] - alpha[j] * c[i];
+        }
+        tmp = 0;
+#pragma omp parallel for reduction(+:tmp)
+        for (long i = 0; i < nstates; i++) {
+            tmp += q[i] * q[i];
+        }
+        beta[j] = sqrt(tmp);
+        nIterations = j;
+        printf("beta[%d]=%e\n", j, beta[j]);
+
+        // ------------ SolverTriDiagonal begin
+        evec=new double[nIterations];
+        solvetridiag(&dnew,evec,alpha,beta,nIterations);
+        // -------------- Tridiag solver end
+        printf("Difference %e - %e = %e\n", dnew, dold, fabs(dnew - dold));
+        if (j > 5) {
+            if ((fabs(dnew - dold) < convCrit)) {
+                break;
+            }
+            free(evec);
+        }
+        
+        time2 = timeInSec();
+        printf("Iteration time in sec %ld\n", (time2 - time1));
+
+    }
+    delete(c);
+    delete(q);
+    delete(alpha);
+    delete(beta);
+    //    return 0;
+}
+
+
+
 void lanczos() {
     int j;
     int nIterations = 0;
@@ -730,7 +854,7 @@ void lanczos() {
         gsl_eigen_symmv(mm, eval, evec, w);
         gsl_eigen_symmv_free(w);
         gsl_eigen_symmv_sort(eval, evec, GSL_EIGEN_SORT_VAL_ASC);
-
+        
 
         double* d = new double[nIterations];
         for (int i = 0; i < nIterations; i++)
