@@ -55,6 +55,9 @@
  * 
  * 
  */
+
+#define _SPARSE_
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -65,28 +68,30 @@
 #include <mm_malloc.h>
 #include <iostream>
 #include <fstream>
+#include <inttypes.h>
+
 // number of sites
-int nsites = 12;
+uint64_t nsites = 12;
 // number of up electrons
-int neup = 6;
+uint64_t neup = 6;
 // number of down electrons
-int nedo = 6;
+uint64_t nedo = 6;
 // array for the up-states
-int* sup;
+uint64_t* sup;
 // array for the down states
-int* sdo;
+uint64_t* sdo;
 // interaction strength
 double U = 0;
 // chemical potential (both spins the same)
 double mu = 0;
 // number of states = nstatesup*nstatesdo
-long nstates;
+uint64_t nstates;
 // number of states with spin up
-long nstatesup;
+uint64_t nstatesup;
 // number of states with spin down
-long nstatesdo;
+uint64_t nstatesdo;
 // maximum number of iterations
-int maxiter = 200;
+uint64_t maxiter = 200;
 // convergence criterion
 double convCrit = 0.000000000001;
 // hamilton matrix for spin up (hoppings)
@@ -98,9 +103,9 @@ double** mdo;
 // hamilton matrix diagonal (chemical potential and interaction)
 // this matrix is of size nstatesup*nstatesdo
 double* mdia;
-long blockup = 30;
+uint64_t blockup = 30;
 // number of hoppings
-int nhoppings;
+uint64_t nhoppings;
 // site-to-site hopping matrix
 int** hopping;
 // hopping values
@@ -111,6 +116,27 @@ double* mu_up;
 double* mu_do;
 // interaction for each site
 double* interaction;
+
+#ifdef _SPARSE_
+// how many values are in a given row?
+uint32_t* sparse_nup;
+uint32_t* sparse_ndo;
+
+// pointers to the values
+double** sparse_pvup;
+double** sparse_pvdo;
+
+// pointers to the columns
+uint64_t** sparse_pcup;
+uint64_t** sparse_pcdo;
+
+// buffers
+//double* sparse_vbuffer;
+//uint64_t* sparse_cbuffer;
+
+uint64_t sparse_buffersize=500;
+
+#endif
 
 #define LDEBUG
 
@@ -134,22 +160,22 @@ void readConfigFromFile(char* filename) {
     hopping = new int*[nhoppings];
     hoppingvalue = new double[nhoppings];
     // allocate the hoppings
-    for (int i = 0; i < nhoppings; i++) {
+    for (uint64_t i = 0; i < nhoppings; i++) {
         hopping[i] = new int[2];
     }
     // read in all the hoppings
-    for (int i = 0; i < nhoppings; i++) {
+    for (uint64_t i = 0; i < nhoppings; i++) {
         cfile >> hopping[i][0] >> hopping[i][1] >> hoppingvalue[i];
     }
     // read in interactions and chemical potential for up and down
-    for (int i = 0; i < nsites; i++) {
+    for (uint64_t i = 0; i < nsites; i++) {
         cfile >> interaction[i] >> mu_up[i] >> mu_do[i];
     }
     cfile.close();
 }
 
-// Faculty function - long type should suffice
-long faculty(long i) {
+// Faculty function - uint64_t type should suffice
+uint64_t faculty(uint64_t i) {
     if (i == 1 || i == 0) {
         return 1;
     } else {
@@ -158,7 +184,7 @@ long faculty(long i) {
 }
 
 // Compute the number of states per spin
-long nStatesPerSpin(int nsites, int nelec) {
+uint64_t nStatesPerSpin(uint64_t nsites, uint64_t nelec) {
     return faculty(nsites) / faculty(nelec) / faculty(nsites - nelec);
 }
 
@@ -170,12 +196,12 @@ void printConfig() {
     cout << "Number of up electrons     : " << neup << endl;
     cout << "Number of down electrons   : " << nedo << endl;
     cout << "Number of hoppings         : " << nhoppings << endl;
-    for (int i = 0; i < nhoppings; i++) {
+    for (uint64_t i = 0; i < nhoppings; i++) {
         cout << "hopping " << i << "    : " 
                 << hopping[i][0] << " " << hopping[i][1] 
                 << " " << hoppingvalue[i] << endl;
     }
-    for (int i = 0; i < nsites; i++) {
+    for (uint64_t i = 0; i < nsites; i++) {
         cout << "interaction/mu_up/mu_down " 
                 << i << " : " << interaction[i] << " " 
                 << mu_up[i] << " " << mu_do[i] << endl;
@@ -189,27 +215,27 @@ void printConfig() {
             << endl;
 }
 
-void printState(int s, int ns) {
-    for (int i = 0; i < ns; i++) {
-        int t = (s & (1 << i));
+void printState(uint64_t s, uint64_t ns) {
+    for (uint64_t i = 0; i < ns; i++) {
+        uint64_t t = (s & (1 << i));
         if (t == 0) {
             printf("0");
         } else {
             printf("1");
         }
     }
-    printf("\n");
+//    printf("\n");
 }
 
-long timeInSec(void) {
+double timeInSec(void) {
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    return (long) (tv.tv_sec * 1000 + tv.tv_usec / 1000.0);
+    return (double) ((tv.tv_sec * 1000 + tv.tv_usec / 1000.0))/1000.0;
 }
 
 // getBitAt
 // Get a bit in an integer
-int inline getBitAt(int st, int pos) {
+uint64_t inline getBitAt(uint64_t st, uint64_t pos) {
     return ((st & (1 << pos)) >> pos);
 }
 
@@ -217,7 +243,7 @@ int inline getBitAt(int st, int pos) {
 // Sum all the bits in an integer.
 // This is offloaded to an intrinsic function calling
 // the respective assembly instruction.
-int inline popcount(int i) {
+uint64_t inline popcount(uint64_t i) {
     return __builtin_popcount(i);
 }
 
@@ -225,17 +251,17 @@ int inline popcount(int i) {
 // Fills an arrays with numbers between 0 and 2^L-1
 // having nelec number of bits (which correspond to 
 // electrons).
-void setupBasis(int*& basis, int nsites, int nelec) {
-    int bmin = (1 << nelec) - 1;
-    int bmax = bmin << (nsites - nelec);
-    int n = 0;
-    for (int i = bmin; i <= bmax; i++) {
+void setupBasis(uint64_t*& basis, uint64_t nsites, uint64_t nelec) {
+    uint64_t bmin = (1 << nelec) - 1;
+    uint64_t bmax = bmin << (nsites - nelec);
+    uint64_t n = 0;
+    for (uint64_t i = bmin; i <= bmax; i++) {
         if (popcount(i) == nelec) {
             basis[n] = i;
             n++;
         }
     }
-    printf("set up %d states\n", n);
+    printf("set up %ld states\n", n);
 }
 
 // matrixelementU
@@ -243,16 +269,16 @@ void setupBasis(int*& basis, int nsites, int nelec) {
 // up and down states u and d. 
 // This can be done a lot quicker, but has not been a 
 // bottle neck at this time.
-double matrixelementU(int u, int d) {
+double matrixelementU(uint64_t u, uint64_t d) {
     double ret = 0;
-    for (int i = 0; i < nsites; i++)
+    for (uint64_t i = 0; i < nsites; i++)
         ret += interaction[i] * getBitAt(u, i) * getBitAt(d, i);
     return ret;
 }
 
-double matrixelementMu(int u, int d) {
+double matrixelementMu(uint64_t u, uint64_t d) {
     double ret = 0;
-    for (int i = 0; i < nsites; i++)
+    for (uint64_t i = 0; i < nsites; i++)
         ret += mu_up[i] * getBitAt(u, i) + mu_do[i] * getBitAt(d, i);
     return ret;
 }
@@ -266,39 +292,39 @@ double matrixelementMu(int u, int d) {
 
 // TODO :  review this method
 
-inline double comsign2(int r, int a, int b) {
+inline double comsign2(uint64_t r, uint64_t a, uint64_t b) {
     a = a % nsites;
     b = b % nsites;
-    int l = a < b ? a : b;
-    int h = a >= b ? a : b;
+    uint64_t l = a < b ? a : b;
+    uint64_t h = a >= b ? a : b;
 
-    unsigned int mask = ((1 << h) - 1)-((1 << (l + 1)) - 1);
+    uint64_t mask = ((1 << h) - 1)-((1 << (l + 1)) - 1);
     double ret = -(((popcount(mask & r) % 2) << 1) - 1);
     return ret;
 }
 
-double matrixelementT(int l, int r) {
+double matrixelementT(uint64_t l, uint64_t r) {
     double tmp = 0;
-    int n;
-    int m;
-    int ra;
-    int re;
-    int s1;
-    int s2;
+    uint64_t n;
+    uint64_t m;
+    uint64_t ra;
+    uint64_t re;
+    uint64_t s1;
+    uint64_t s2;
 
-    for (int i = 0; i < nhoppings; i++) {
-        int n = hopping[i][0];
-        int m = hopping[i][1];
+    for (uint64_t i = 0; i < nhoppings; i++) {
+        uint64_t n = hopping[i][0];
+        uint64_t m = hopping[i][1];
         double cs = comsign2(r, n, m);
 
-        int ra = (r - (1 << n)+(1 << m));
-        int re = (ra == l);
-        int s1 = ((r & (1 << n)) >> n);
-        int s2 = ((r & (1 << m)) >> m);
+        uint64_t ra = (r - (1 << n)+(1 << m));
+        uint64_t re = (ra == l);
+        uint64_t s1 = ((r & (1 << n)) >> n);
+        uint64_t s2 = ((r & (1 << m)) >> m);
         s2 = (1 - s2);
         tmp += hoppingvalue[i] * cs * s1 * s2 * re;
 
-        int p = n;
+        uint64_t p = n;
         n = m;
         m = p;
         ra = (r - (1 << n)+(1 << m));
@@ -382,16 +408,16 @@ double matrixelementT(int l, int r) {
 //    return tmp;
 //}
 
-double matrixelementT1D(int l, int r) {
+double matrixelementT1D(uint64_t l, uint64_t r) {
     double tmp = 0;
-    int n;
-    int m;
-    int ra;
-    int re;
-    int s1;
-    int s2;
+    uint64_t n;
+    uint64_t m;
+    uint64_t ra;
+    uint64_t re;
+    uint64_t s1;
+    uint64_t s2;
 
-    for (int i = 0; i < nsites - 1; i++) {
+    for (uint64_t i = 0; i < nsites - 1; i++) {
         n = i;
         m = i + 1;
         ra = (r - (1 << n)+(1 << m));
@@ -445,19 +471,19 @@ double matrixelementT1D(int l, int r) {
     return tmp;
 }
 
-double matrixelementT2(int l, int r) {
+double matrixelementT2(uint64_t l, uint64_t r) {
     double tmp = 0;
-    for (int i = 0; i < nsites - 1; i++) {
-        int n = i;
-        int m = i + 1;
+    for (uint64_t i = 0; i < nsites - 1; i++) {
+        uint64_t n = i;
+        uint64_t m = i + 1;
 
-        int xn = (1 << n);
-        int xm = (1 << m);
+        uint64_t xn = (1 << n);
+        uint64_t xm = (1 << m);
 
-        int ra = (r - xn + xm);
-        int re = (ra == l);
-        int s1 = ((r & xn) >> n);
-        int s2 = ((r & xm) >> m);
+        uint64_t ra = (r - xn + xm);
+        uint64_t re = (ra == l);
+        uint64_t s1 = ((r & xn) >> n);
+        uint64_t s2 = ((r & xm) >> m);
         s2 = (1 - s2);
         tmp += hoppingvalue[i] * s1 * s2 * re;
 
@@ -471,7 +497,7 @@ double matrixelementT2(int l, int r) {
     return tmp;
 }
 
-double matrixelement(int lu, int ld, int ru, int rd) {
+double matrixelement(uint64_t lu, uint64_t ld, uint64_t ru, uint64_t rd) {
     double r = 0;
     if (ld == rd && lu == ru) {
         r = matrixelementU(lu, ld);
@@ -488,13 +514,13 @@ double matrixelement(int lu, int ld, int ru, int rd) {
 
 void QPlusHTimesC1(double* &q, double* &c) {
 #pragma omp parallel for
-    for (long i = 0; i < nstatesup; i++) {
-        for (long j = 0; j < nstatesdo; j++) {
-            int p = i * nstatesup + j;
+    for (uint64_t i = 0; i < nstatesup; i++) {
+        for (uint64_t j = 0; j < nstatesdo; j++) {
+            uint64_t p = i * nstatesup + j;
             double m = 0;
-            for (long k = 0; k < nstatesup; k++) {
-                for (long l = 0; l < nstatesdo; l++) {
-                    int n = k * nstatesup + l;
+            for (uint64_t k = 0; k < nstatesup; k++) {
+                for (uint64_t l = 0; l < nstatesdo; l++) {
+                    uint64_t n = k * nstatesup + l;
                     m += matrixelement(sup[i], sdo[j], sup[k], sdo[l]) * c[n];
                 }
             }
@@ -506,33 +532,33 @@ void QPlusHTimesC1(double* &q, double* &c) {
 // exploiting spin symmetry
 void QPlusHTimesC2(double* &q, double* &c) {
 #pragma omp parallel for
-    for (long i = 0; i < nstatesup; i++) {
-        for (long j = 0; j < nstatesdo; j++) {
-            int p = i * nstatesup + j;
+    for (uint64_t i = 0; i < nstatesup; i++) {
+        for (uint64_t j = 0; j < nstatesdo; j++) {
+            uint64_t p = i * nstatesup + j;
             double m = 0;
-            for (long k = 0; k < nstatesup; k++) {
-                int n = k * nstatesup + j;
+            for (uint64_t k = 0; k < nstatesup; k++) {
+                uint64_t n = k * nstatesup + j;
                 m += matrixelementT(sup[i], sup[k]) * c[n];
             }
             q[p] += m;
         }
     }
 #pragma omp parallel for
-    for (long i = 0; i < nstatesup; i++) {
-        for (long j = 0; j < nstatesdo; j++) {
-            int p = i * nstatesup + j;
+    for (uint64_t i = 0; i < nstatesup; i++) {
+        for (uint64_t j = 0; j < nstatesdo; j++) {
+            uint64_t p = i * nstatesup + j;
             double m = 0;
-            for (long l = 0; l < nstatesdo; l++) {
-                int n = i * nstatesup + l;
+            for (uint64_t l = 0; l < nstatesdo; l++) {
+                uint64_t n = i * nstatesup + l;
                 m += matrixelementT(sdo[j], sdo[l]) * c[n];
             }
             q[p] += m;
         }
     }
 #pragma omp parallel for
-    for (long i = 0; i < nstatesup; i++) {
-        for (long j = 0; j < nstatesdo; j++) {
-            int p = i * nstatesup + j;
+    for (uint64_t i = 0; i < nstatesup; i++) {
+        for (uint64_t j = 0; j < nstatesdo; j++) {
+            uint64_t p = i * nstatesup + j;
             double m = 0;
             m += matrixelementU(sup[i], sdo[j]) * c[p];
             m += matrixelementMu(sup[i], sdo[j]) * c[p];
@@ -542,112 +568,193 @@ void QPlusHTimesC2(double* &q, double* &c) {
 }
 
 void QPlusHTimesC3(double* &q, double* &c) {
-    long time1, time2;
-
+    double time1, time2;
+#ifdef _SPARSE_
     printf("MatVec Hopping Up: ");
     time1 = timeInSec();
 #pragma omp parallel for
-    for (long i = 0; i < nstatesup; i++) {
-        for (long j = 0; j < nstatesdo; j++) {
-            int p = i * nstatesup + j;
+    for (uint64_t i = 0; i < nstatesup; i++) {
+        for (uint64_t j = 0; j < nstatesdo; j++) {
+            uint64_t p = i * nstatesup + j;
             double m = 0;
-            for (long k = 0; k < nstatesup; k++) {
-                int n = k * nstatesup + j;
+//            for (uint64_t k = 0; k < nstatesup; k++) {
+//                uint64_t n = k * nstatesup + j;
+//                m += mup[i][k] * c[n];
+//            }
+            for(uint64_t n=0;n<sparse_nup[i];n++){
+                m+=sparse_pvup[i][n]*c[sparse_pcup[i][n]*nstatesup+j];
+//                printf("%d %d %d %f\n",i,j,sparse_pvup[i][n],sparse_pcup[i][n]);
+            }    
+            q[p] += m;
+        }
+    }
+    time2 = timeInSec();
+    printf("%f\n", time2 - time1);
+
+    printf("MatVec Hopping Down: ");
+    time1 = timeInSec();
+#pragma omp parallel for
+    for (uint64_t j = 0; j < nstatesdo; j++) {
+        for (uint64_t i = 0; i < nstatesup; i++) {
+            uint64_t p = i * nstatesup + j;
+            double m = 0;
+//            for (uint64_t l = 0; l < nstatesdo; l++) {
+//                int n = i * nstatesup + l;
+//                m += mdo[j][l] * c[n];
+//            }
+            for(uint64_t n=0;n<sparse_nup[j];n++){
+                m+=sparse_pvdo[j][n]*c[i*nstatesup+sparse_pcdo[j][n]];
+            }                
+            q[p] += m;
+        }
+    }
+    time2 = timeInSec();
+    printf("%f\n", time2 - time1);
+
+//    printf("MatVec Diagonal: ");
+//    time1 = timeInSec();
+//#pragma omp parallel for
+//    for (uint64_t i = 0; i < nstatesup; i++) {
+//        for (uint64_t j = 0; j < nstatesdo; j++) {
+//            uint64_t p = i * nstatesup + j;
+//            double m = 0;
+//            m += mdia[p] * c[p];
+//            q[p] += m;
+//        }
+//    }
+//    time2 = timeInSec();
+//    printf("%ld\n", time2 - time1);
+#else
+    printf("MatVec Hopping Up: ");
+    time1 = timeInSec();
+#pragma omp parallel for
+    for (uint64_t i = 0; i < nstatesup; i++) {
+        for (uint64_t j = 0; j < nstatesdo; j++) {
+            uint64_t p = i * nstatesup + j;
+            double m = 0;
+            for (uint64_t k = 0; k < nstatesup; k++) {
+                uint64_t n = k * nstatesup + j;
                 m += mup[i][k] * c[n];
             }
             q[p] += m;
         }
     }
     time2 = timeInSec();
-    printf("%ld\n", time2 - time1);
+    printf("%f\n", time2 - time1);
 
     printf("MatVec Hopping Down: ");
     time1 = timeInSec();
 #pragma omp parallel for
-    for (long i = 0; i < nstatesup; i++) {
-        for (long j = 0; j < nstatesdo; j++) {
-            int p = i * nstatesup + j;
+    for (uint64_t i = 0; i < nstatesup; i++) {
+        for (uint64_t j = 0; j < nstatesdo; j++) {
+            uint64_t p = i * nstatesup + j;
             double m = 0;
-            for (long l = 0; l < nstatesdo; l++) {
-                int n = i * nstatesup + l;
+            for (uint64_t l = 0; l < nstatesdo; l++) {
+                uint64_t n = i * nstatesup + l;
                 m += mdo[j][l] * c[n];
             }
             q[p] += m;
         }
     }
     time2 = timeInSec();
-    printf("%ld\n", time2 - time1);
+    printf("%f\n", time2 - time1);
 
+//    printf("MatVec Diagonal: ");
+//    time1 = timeInSec();
+//#pragma omp parallel for
+//    for (uint64_t i = 0; i < nstatesup; i++) {
+//        for (uint64_t j = 0; j < nstatesdo; j++) {
+//            uint64_t p = i * nstatesup + j;
+//            double m = 0;
+//            m += mdia[p] * c[p];
+//            q[p] += m;
+//        }
+//    }
+//    time2 = timeInSec();
+//    printf("%f\n", time2 - time1);
+#endif
     printf("MatVec Diagonal: ");
     time1 = timeInSec();
 #pragma omp parallel for
-    for (long i = 0; i < nstatesup; i++) {
-        for (long j = 0; j < nstatesdo; j++) {
-            int p = i * nstatesup + j;
+    for (uint64_t i = 0; i < nstatesup; i++) {
+        for (uint64_t j = 0; j < nstatesdo; j++) {
+            uint64_t p = i * nstatesup + j;
             double m = 0;
             m += mdia[p] * c[p];
             q[p] += m;
         }
     }
     time2 = timeInSec();
-    printf("%ld\n", time2 - time1);
+    printf("%f\n", time2 - time1);
 }
 
-void QPlusHTimesC4(double* &q, double* &c) {
-    long time1, time2;
+//void QPlusHTimesC4(double* &q, double* &c) {
+//    uint64_t time1, time2;
+//
+//    printf("MatVec Hopping Down: ");
+//    time1 = timeInSec();
+//#pragma omp parallel for
+//    for (uint64_t i = 0; i < nstatesup; i++) {
+//        for (uint64_t j = 0; j < nstatesdo; j++) {
+//            uint64_t p = i * nstatesup + j;
+//            double m = 0;
+//            for (uint64_t l = 0; l < nstatesdo; l++) {
+//                uint64_t n = i * nstatesup + l;
+//                m += mdo[j][l] * c[n];
+//            }
+//            q[p] += m;
+//        }
+//    }
+//    time2 = timeInSec();
+//    printf("%f\n", time2 - time1);
+//
+//    printf("MatVec Hopping Up: ");
+//    time1 = timeInSec();
+//    for (uint64_t kk = 0; kk < nstatesup; kk += blockup) {
+//#pragma omp parallel for
+//        for (uint64_t i = 0; i < nstatesup; i++) {
+//            for (uint64_t j = 0; j < nstatesdo; j++) {
+//                uint64_t p = i * nstatesup + j;
+//                double m = 0;
+//                uint64_t ub = fmin(kk + blockup, nstatesup);
+//                for (uint64_t k = kk; k < ub; k++) {
+//                    uint64_t n = k * nstatesup + j;
+//                    m += mup[i][k] * c[n];
+//                }
+//                q[p] += m;
+//            }
+//        }
+//    }
+//
+//    time2 = timeInSec();
+//    printf("%f\n", time2 - time1);
+//
+//    printf("MatVec Diagonal: ");
+//    time1 = timeInSec();
+//#pragma omp parallel for
+//    for (uint64_t i = 0; i < nstatesup; i++) {
+//        for (uint64_t j = 0; j < nstatesdo; j++) {
+//            uint64_t p = i * nstatesup + j;
+//            double m = 0;
+//            m += mdia[p] * c[p];
+//            q[p] += m;
+//        }
+//    }
+//    time2 = timeInSec();
+//    printf("%f\n", time2 - time1);
+//}
 
-    printf("MatVec Hopping Down: ");
-    time1 = timeInSec();
-#pragma omp parallel for
-    for (long i = 0; i < nstatesup; i++) {
-        for (long j = 0; j < nstatesdo; j++) {
-            int p = i * nstatesup + j;
-            double m = 0;
-            for (long l = 0; l < nstatesdo; l++) {
-                int n = i * nstatesup + l;
-                m += mdo[j][l] * c[n];
-            }
-            q[p] += m;
-        }
-    }
-    time2 = timeInSec();
-    printf("%ld\n", time2 - time1);
-
-    printf("MatVec Hopping Up: ");
-    time1 = timeInSec();
-    for (long kk = 0; kk < nstatesup; kk += blockup) {
-#pragma omp parallel for
-        for (long i = 0; i < nstatesup; i++) {
-            for (int j = 0; j < nstatesdo; j++) {
-                long p = i * nstatesup + j;
-                double m = 0;
-                int ub = fmin(kk + blockup, nstatesup);
-                for (long k = kk; k < ub; k++) {
-                    long n = k * nstatesup + j;
-                    m += mup[i][k] * c[n];
-                }
-                q[p] += m;
-            }
-        }
-    }
-
-    time2 = timeInSec();
-    printf("%ld\n", time2 - time1);
-
-    printf("MatVec Diagonal: ");
-    time1 = timeInSec();
-#pragma omp parallel for
-    for (long i = 0; i < nstatesup; i++) {
-        for (long j = 0; j < nstatesdo; j++) {
-            int p = i * nstatesup + j;
-            double m = 0;
-            m += mdia[p] * c[p];
-            q[p] += m;
-        }
-    }
-    time2 = timeInSec();
-    printf("%ld\n", time2 - time1);
-}
+// solvetridiag
+// Solves the alpha/beta tridiagonal matrix using gsl
+// 
+// gse: double value
+// gsv: double value array of length nIterations
+// alpha: double value array of length nIterations
+// beta: double value array of length nIterations
+// nIterations: number of iterations up to this point
+// 
+// There is much to be optimized around this function, but since 
+// this is only of dimension nIterations, we don't care.
 
 void solvetridiag(double &gse, double* &gsv, double* &alpha, double* &beta, int nIterations){
         gsl_matrix *mm = gsl_matrix_alloc(nIterations, nIterations);
@@ -702,15 +809,15 @@ void lanczos2() {
     double* q;
     double dnew;
     double* evec;
-    double dold = 10000000;
+    double dold = 10e+300;
     double* beta = new double[maxiter];
     double* alpha = new double[maxiter];
     c = new double[nstates];
     q = new double[nstates];
-    long time1, time2;
+    double time1, time2;
     
 #pragma omp parallel for
-    for (long i = 0; i < nstates; i++) {
+    for (uint64_t i = 0; i < nstates; i++) {
         c[i] = 1.0 / sqrt((double) nstates);
         q[i] = 0;
     }
@@ -722,7 +829,7 @@ void lanczos2() {
 
         if (j != 0) {
 #pragma omp parallel for
-            for (long i = 0; i < nstates; i++) {
+            for (uint64_t i = 0; i < nstates; i++) {
                 double t = c[i];
                 c[i] = q[i] / beta[j];
                 q[i] = -beta[j] * t;
@@ -733,17 +840,17 @@ void lanczos2() {
 
         double tmp = 0;
 #pragma omp parallel for reduction(+:tmp)
-        for (long i = 0; i < nstates; i++) {
+        for (uint64_t i = 0; i < nstates; i++) {
             tmp += c[i] * q[i];
         }
         alpha[j] = tmp;
 #pragma omp parallel for
-        for (long i = 0; i < nstates; i++) {
+        for (uint64_t i = 0; i < nstates; i++) {
             q[i] = q[i] - alpha[j] * c[i];
         }
         tmp = 0;
 #pragma omp parallel for reduction(+:tmp)
-        for (long i = 0; i < nstates; i++) {
+        for (uint64_t i = 0; i < nstates; i++) {
             tmp += q[i] * q[i];
         }
         beta[j] = sqrt(tmp);
@@ -764,7 +871,7 @@ void lanczos2() {
         }
         
         time2 = timeInSec();
-        printf("Iteration time in sec %ld\n", (time2 - time1));
+        printf("Iteration time in sec %f\n", (time2 - time1));
 
     }
     delete(c);
@@ -787,10 +894,10 @@ void lanczos() {
     double* alpha = new double[maxiter];
     c = new double[nstates];
     q = new double[nstates];
-    long time1, time2;
+    double time1, time2;
     
 #pragma omp parallel for
-    for (long i = 0; i < nstates; i++) {
+    for (uint64_t i = 0; i < nstates; i++) {
         c[i] = 1.0 / sqrt((double) nstates);
         q[i] = 0;
     }
@@ -802,28 +909,28 @@ void lanczos() {
 
         if (j != 0) {
 #pragma omp parallel for
-            for (long i = 0; i < nstates; i++) {
+            for (uint64_t i = 0; i < nstates; i++) {
                 double t = c[i];
                 c[i] = q[i] / beta[j];
                 q[i] = -beta[j] * t;
             }
         }
-        QPlusHTimesC4(q, c);
+        QPlusHTimesC3(q, c);
         j++;
 
         double tmp = 0;
 #pragma omp parallel for reduction(+:tmp)
-        for (long i = 0; i < nstates; i++) {
+        for (uint64_t i = 0; i < nstates; i++) {
             tmp += c[i] * q[i];
         }
         alpha[j] = tmp;
 #pragma omp parallel for
-        for (long i = 0; i < nstates; i++) {
+        for (uint64_t i = 0; i < nstates; i++) {
             q[i] = q[i] - alpha[j] * c[i];
         }
         tmp = 0;
 #pragma omp parallel for reduction(+:tmp)
-        for (long i = 0; i < nstates; i++) {
+        for (uint64_t i = 0; i < nstates; i++) {
             tmp += q[i] * q[i];
         }
         beta[j] = sqrt(tmp);
@@ -876,7 +983,7 @@ void lanczos() {
         dold = d[0];
         delete(d);
         time2 = timeInSec();
-        printf("Iteration time in sec %ld\n", (time2 - time1));
+        printf("Iteration time in sec %f\n", (time2 - time1));
 
     }
     delete(c);
@@ -887,25 +994,101 @@ void lanczos() {
 }
 
 void setupMatrix() {
-    long time1, time2;
+    double time1, time2;
     time1 = timeInSec();
+#ifdef _SPARSE_
 
+#pragma omp parallel
+    {
+        double* sparse_vbuffer = new double[sparse_buffersize];
+        uint64_t* sparse_cbuffer = new uint64_t[sparse_buffersize];
+#pragma omp for
+        for (uint64_t i = 0; i < nstatesup; i++) {
+            int n = 0;
+            for (uint64_t k = 0; k < nstatesup; k++) {
+                double m = matrixelementT(sup[i], sup[k]);
+//                printf("%f ", m);
+                if (m != 0.0e+0) {                   
+                    sparse_cbuffer[n] = k;
+//                    sparse_cbuffer[n] = i * nstatesup + k;
+                    sparse_vbuffer[n] = m;
+//                    printf("%d %d %d %f \n",i,k,n,m);
+                    n++;
+                }
+            }
+//            printf("\n");
+            sparse_nup[i] = n;
+            sparse_pcup[i] = new uint64_t[n];
+            sparse_pvup[i] = new double[n];
+            for (int r = 0; r < n; r++) {
+                sparse_pcup[i][r] = sparse_cbuffer[r];
+                sparse_pvup[i][r] = sparse_vbuffer[r];
+//                printf("%d %d %f \n",i,sparse_cbuffer[r],sparse_vbuffer[r]);
+//                printf("%d %d %f \n",i,sparse_pcup[i][r],sparse_pvup[i][r]);
+//                printf("\n");
+            }
+        }
+
+#pragma omp for
+        for (uint64_t j = 0; j < nstatesdo; j++) {
+//            double* sparse_vbuffer = new double[sparse_buffersize];
+//            uint64_t* sparse_cbuffer = new uint64_t[sparse_buffersize];
+            int n = 0;
+            for (uint64_t l = 0; l < nstatesdo; l++) {
+                double m = matrixelementT(sdo[j], sdo[l]);
+                if (m != 0.0e+0) {
+//                    sparse_cbuffer[n] = j*nstatesup+l;
+                    sparse_cbuffer[n] = l;
+                    sparse_vbuffer[n] = m;
+                    n++;
+                }
+            }
+            sparse_ndo[j] = n;
+            sparse_pcdo[j] = new uint64_t[n];
+            sparse_pvdo[j] = new double[n];
+            for (int r = 0; r < n; r++) {
+                sparse_pcdo[j][r] = sparse_cbuffer[r];
+                sparse_pvdo[j][r] = sparse_vbuffer[r];
+            }
+        }
+#pragma omp for
+        for (uint64_t i = 0; i < nstatesup; i++) {
+            for (uint64_t j = 0; j < nstatesdo; j++) {
+//                int p = i * nstatesup + j;
+                uint64_t p = i * nstatesdo + j;
+                mdia[p] = matrixelementU(sup[i], sdo[j]);
+                mdia[p] += matrixelementMu(sup[i], sdo[j]);
+            }
+        }
+    }
+#else
 #pragma omp parallel for
-    for (long i = 0; i < nstatesup; i++) {
-        for (long k = 0; k < nstatesup; k++) {
+    for (uint64_t i = 0; i < nstatesup; i++) {
+        for (uint64_t k = 0; k < nstatesup; k++) {
             mup[i][k] = matrixelementT(sup[i], sup[k]);
+//            if(mup[i][k]!=0.0e+0){
+//                printState(sup[i],nsites);
+//                printf(" ");
+//                printState(sup[k],nsites);
+//                printf(" ");
+//                printState(sup[i]^sup[k],nsites);
+//                printf(" %f\n",mup[i][k]);
+//            }
         }
     }
 #pragma omp parallel for
-    for (long j = 0; j < nstatesdo; j++) {
-        for (long l = 0; l < nstatesdo; l++) {
+    for (uint64_t j = 0; j < nstatesdo; j++) {
+        for (uint64_t l = 0; l < nstatesdo; l++) {
             mdo[j][l] = matrixelementT(sdo[j], sdo[l]);
+//            if(mdo[j][l]!=0.0e+0){
+//                printf("%ld %ld %f\n",j,l,mdo[j][l]);
+//            }
         }
     }
 #pragma omp parallel for
-    for (long i = 0; i < nstatesup; i++) {
-        for (long j = 0; j < nstatesdo; j++) {
-            int p = i * nstatesup + j;
+    for (uint64_t i = 0; i < nstatesup; i++) {
+        for (uint64_t j = 0; j < nstatesdo; j++) {
+            uint64_t p = i * nstatesup + j;
             mdia[p] = matrixelementU(sup[i], sdo[j]);
             mdia[p] += matrixelementMu(sup[i], sdo[j]);
         }
@@ -923,8 +1106,10 @@ void setupMatrix() {
     //        }
     //        printf("\n");
     //    }
+    
+#endif
     time2 = timeInSec();
-    printf("Setup: %ld\n", time2 - time1);
+    printf("Setup: %f\n", time2 - time1);
 
 }
 
@@ -932,25 +1117,49 @@ void init() {
     nstatesup = nStatesPerSpin(nsites, neup);
     nstatesdo = nStatesPerSpin(nsites, nedo);
     nstates = nstatesup*nstatesdo;
-    sup = new int[nstatesup];
-    sdo = new int[nstatesdo];
+    sup = new uint64_t[nstatesup];
+    sdo = new uint64_t[nstatesdo];
+#ifdef _SPARSE_
+    sparse_nup = new uint32_t[nstatesup];
+    sparse_ndo = new uint32_t[nstatesdo];
+
+    sparse_pvup = new double*[nstatesup];
+    sparse_pvdo = new double*[nstatesdo];
+
+    sparse_pcup = new uint64_t*[nstatesup];
+    sparse_pcdo = new uint64_t*[nstatesdo];
+#else
     mup = new double*[nstatesup];
     mdo = new double*[nstatesdo];
+#endif
+    
     mdia = new double[nstates];
 
     setupBasis(sup, nsites, neup);
     setupBasis(sdo, nsites, nedo);
 
+#ifdef _SPARSE_
+// nothing to do here  
+#else
     for (int i = 0; i < nstatesup; i++) {
         mup[i] = new double[nstatesup];
     }
     for (int i = 0; i < nstatesdo; i++) {
         mdo[i] = new double[nstatesdo];
     }
+#endif
     setupMatrix();
 }
+#ifdef _SPARSE_
+void printsparsematrix(){
+    for(int i=0;i<nstatesup;i++){
+        for(int n=0;n<sparse_nup[i];n++){
+            printf("%d %d %f \n",i,sparse_pcup[i][n],sparse_pvup[i][n]);
+        } 
+    }
 
-
+}
+#endif
 /*
  *
  */
@@ -960,6 +1169,7 @@ int main(int argc, char** argv) {
     printConfig();
     printf("blockup = %ld\n", blockup);
     init();
+//    printsparsematrix();
     lanczos2();
     return (EXIT_SUCCESS);
 }
