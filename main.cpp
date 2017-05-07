@@ -20,7 +20,7 @@
  * are easily calculated.  
  * 
  * Very little thought was spent to improve the performance, since only a 
- * smart way of verifying ground state energies for modes cluster sizes was
+ * smart way of verifying ground state energies for modest cluster sizes was
  * needed. 
  * 
  * The Hamiltonian is represented by to spin-separate matrices for the 
@@ -197,13 +197,13 @@ void printConfig() {
     cout << "Number of down electrons   : " << nedo << endl;
     cout << "Number of hoppings         : " << nhoppings << endl;
     for (uint64_t i = 0; i < nhoppings; i++) {
-        cout << "hopping " << i << "    : " 
+        cout << "hopping " << i << " \t: " 
                 << hopping[i][0] << " " << hopping[i][1] 
                 << " " << hoppingvalue[i] << endl;
     }
     for (uint64_t i = 0; i < nsites; i++) {
         cout << "interaction/mu_up/mu_down " 
-                << i << " : " << interaction[i] << " " 
+                << i << "\t: " << interaction[i] << " " 
                 << mu_up[i] << " " << mu_do[i] << endl;
     }
     cout << "Size of up hopping matrix  : " 
@@ -213,6 +213,17 @@ void printConfig() {
     cout << "Size of diagonal matrix    : " 
             << nStatesPerSpin(nsites, neup)*nStatesPerSpin(nsites, nedo) 
             << endl;
+    uint64_t tmp_nstates=nStatesPerSpin(nsites, neup)*nStatesPerSpin(nsites, nedo);
+    uint64_t tmp_nstatesup=nStatesPerSpin(nsites, neup);
+    uint64_t tmp_nstatesdo=nStatesPerSpin(nsites, nedo);
+
+    cout << "Estimated memory footprint: "<< 
+            (double(4)*double(tmp_nstates)
+            + double(tmp_nstatesup)*double(tmp_nstatesup)
+            + double(tmp_nstatesup)*double(tmp_nstatesup))*double(4)
+            /double(1024)/double(1024.0)/double(1024.0)<<" GB"<<endl;
+    cout << "--------------------------------------------------------" << endl; 
+    // /double(1000000000.0)
 }
 
 void printState(uint64_t s, uint64_t ns) {
@@ -261,7 +272,8 @@ void setupBasis(uint64_t*& basis, uint64_t nsites, uint64_t nelec) {
             n++;
         }
     }
-    printf("set up %ld states\n", n);
+//    printf("set up %ld states\n", n);
+    cout << "set up " <<n<< "states"<< endl;
 }
 
 // matrixelementU
@@ -336,77 +348,6 @@ double matrixelementT(uint64_t l, uint64_t r) {
     }
     return tmp;
 }
-
-
-// 2D
-
-//double XXmatrixelementT(int l, int r) {
-//    double tmp = 0;
-//    int n;
-//    int m;
-//    int ra;
-//    int re;
-//    int s1;
-//    int s2;
-//    // first all hoppings in x direction OBC
-//    // no sign required here
-//    for (int j = 0; j < nsitesy; j++) {
-//        for (int i = j * nsitesx; i < (j + 1) * nsitesx - 1; i++) {
-//            int n = i;
-//            int m = i + 1;
-//            int ra = (r - (1 << n)+(1 << m));
-//            int re = (ra == l);
-//            int s1 = ((r & (1 << n)) >> n);
-//            int s2 = ((r & (1 << m)) >> m);
-//            s2 = (1 - s2);
-//            tmp += -s1 * s2 * re;
-//
-//            n = i + 1;
-//            m = i;
-//            ra = (r - (1 << n)+(1 << m));
-//            re = (ra == l);
-//            s1 = ((r & (1 << n)) >> n);
-//            s2 = ((r & (1 << m)) >> m);
-//            s2 = (1 - s2);
-//            tmp += -s1 * s2 * re;
-//        }
-//    }
-//    // ... then all hoppings in y direction
-//    // ... sign required
-//    // make a mask that is the nsitesx-1 values
-//    // between i and i+nsitesx
-//    //    unsigned int mask = (((1 << nsitesx) - 1) - 1);
-//    for (int i = 0; i < nsitesx * (nsitesy - 1); i++) {
-//        // compute the sign
-//        //        int sgn = 1 - 2 * (popcount((r & (mask << i)))&1);
-//        int n = i;
-//        int m = i + nsitesx;
-//        double sgn = comsign(r, n, m);
-//        //        printf("sign =  %f\n", sgn);
-//        int ra = (r - (1 << n)+(1 << m));
-//        int re = (ra == l);
-//        int s1 = ((r & (1 << n)) >> n);
-//        int s2 = ((r & (1 << m)) >> m);
-//        s2 = (1 - s2);
-//        tmp += -s1 * s2 * re * sgn;
-//
-//        n = i + nsitesx;
-//        m = i;
-//        ra = (r - (1 << n)+(1 << m));
-//        re = (ra == l);
-//        s1 = ((r & (1 << n)) >> n);
-//        s2 = ((r & (1 << m)) >> m);
-//        s2 = (1 - s2);
-//        tmp += -s1 * s2 * re * sgn;
-//    }
-//#ifdef _PBC_
-//
-//
-//#endif
-//    // ... then all PBC boundary hoppings
-//
-//    return tmp;
-//}
 
 double matrixelementT1D(uint64_t l, uint64_t r) {
     double tmp = 0;
@@ -883,115 +824,115 @@ void lanczos2() {
 
 
 
-void lanczos() {
-    int j;
-    int nIterations = 0;
-    double* c;
-    double* q;
-    double* d;
-    double dold = 10000000;
-    double* beta = new double[maxiter];
-    double* alpha = new double[maxiter];
-    c = new double[nstates];
-    q = new double[nstates];
-    double time1, time2;
-    
-#pragma omp parallel for
-    for (uint64_t i = 0; i < nstates; i++) {
-        c[i] = 1.0 / sqrt((double) nstates);
-        q[i] = 0;
-    }
-    beta[0] = 0;
-    j = 0;
-
-    for (int n = 0; n < maxiter - 1; n++) {
-        time1 = timeInSec();
-
-        if (j != 0) {
-#pragma omp parallel for
-            for (uint64_t i = 0; i < nstates; i++) {
-                double t = c[i];
-                c[i] = q[i] / beta[j];
-                q[i] = -beta[j] * t;
-            }
-        }
-        QPlusHTimesC3(q, c);
-        j++;
-
-        double tmp = 0;
-#pragma omp parallel for reduction(+:tmp)
-        for (uint64_t i = 0; i < nstates; i++) {
-            tmp += c[i] * q[i];
-        }
-        alpha[j] = tmp;
-#pragma omp parallel for
-        for (uint64_t i = 0; i < nstates; i++) {
-            q[i] = q[i] - alpha[j] * c[i];
-        }
-        tmp = 0;
-#pragma omp parallel for reduction(+:tmp)
-        for (uint64_t i = 0; i < nstates; i++) {
-            tmp += q[i] * q[i];
-        }
-        beta[j] = sqrt(tmp);
-        nIterations = j;
-        printf("beta[%d]=%e\n", j, beta[j]);
-
-        // ------------ SolverTriDiagonal begin
-        gsl_matrix *mm = gsl_matrix_alloc(nIterations, nIterations);
-
-        for (int i = 0; i < nIterations; i++) {
-            for (int j = 0; j < nIterations; j++) {
-                gsl_matrix_set(mm, i, j, 0);
-            }
-        }
-
-        for (int i = 0; i < nIterations; i++) {
-            gsl_matrix_set(mm, i, i, alpha[i]);
-        }
-
-        for (int i = 1; i < nIterations; i++) {
-            gsl_matrix_set(mm, i - 1, i, beta[i - 1]);
-            gsl_matrix_set(mm, i, i - 1, beta[i - 1]);
-        }
-
-        gsl_vector *eval = gsl_vector_alloc(nIterations);
-        gsl_matrix *evec = gsl_matrix_alloc(nIterations, nIterations);
-
-        gsl_eigen_symmv_workspace *w =
-                gsl_eigen_symmv_alloc(nIterations);
-
-        gsl_eigen_symmv(mm, eval, evec, w);
-        gsl_eigen_symmv_free(w);
-        gsl_eigen_symmv_sort(eval, evec, GSL_EIGEN_SORT_VAL_ASC);
-        
-
-        double* d = new double[nIterations];
-        for (int i = 0; i < nIterations; i++)
-            d[i] = gsl_vector_get(eval, i);
-        gsl_matrix_free(mm);
-
-        printf("Eigenvalue = %g\n", d[0]);
-        // ------------ SolverTriDiagonal end
-
-        printf("Difference %e - %e = %e\n", d[0], dold, fabs(d[0] - dold));
-        if (j > 5) {
-            if ((fabs(d[0] - dold) < convCrit)) {
-                break;
-            }
-        }
-        dold = d[0];
-        delete(d);
-        time2 = timeInSec();
-        printf("Iteration time in sec %f\n", (time2 - time1));
-
-    }
-    delete(c);
-    delete(q);
-    delete(alpha);
-    delete(beta);
-    //    return 0;
-}
+//void lanczos() {
+//    int j;
+//    int nIterations = 0;
+//    double* c;
+//    double* q;
+//    double* d;
+//    double dold = 10000000;
+//    double* beta = new double[maxiter];
+//    double* alpha = new double[maxiter];
+//    c = new double[nstates];
+//    q = new double[nstates];
+//    double time1, time2;
+//    
+//#pragma omp parallel for
+//    for (uint64_t i = 0; i < nstates; i++) {
+//        c[i] = 1.0 / sqrt((double) nstates);
+//        q[i] = 0;
+//    }
+//    beta[0] = 0;
+//    j = 0;
+//
+//    for (int n = 0; n < maxiter - 1; n++) {
+//        time1 = timeInSec();
+//
+//        if (j != 0) {
+//#pragma omp parallel for
+//            for (uint64_t i = 0; i < nstates; i++) {
+//                double t = c[i];
+//                c[i] = q[i] / beta[j];
+//                q[i] = -beta[j] * t;
+//            }
+//        }
+//        QPlusHTimesC3(q, c);
+//        j++;
+//
+//        double tmp = 0;
+//#pragma omp parallel for reduction(+:tmp)
+//        for (uint64_t i = 0; i < nstates; i++) {
+//            tmp += c[i] * q[i];
+//        }
+//        alpha[j] = tmp;
+//#pragma omp parallel for
+//        for (uint64_t i = 0; i < nstates; i++) {
+//            q[i] = q[i] - alpha[j] * c[i];
+//        }
+//        tmp = 0;
+//#pragma omp parallel for reduction(+:tmp)
+//        for (uint64_t i = 0; i < nstates; i++) {
+//            tmp += q[i] * q[i];
+//        }
+//        beta[j] = sqrt(tmp);
+//        nIterations = j;
+//        printf("beta[%d]=%e\n", j, beta[j]);
+//
+//        // ------------ SolverTriDiagonal begin
+//        gsl_matrix *mm = gsl_matrix_alloc(nIterations, nIterations);
+//
+//        for (int i = 0; i < nIterations; i++) {
+//            for (int j = 0; j < nIterations; j++) {
+//                gsl_matrix_set(mm, i, j, 0);
+//            }
+//        }
+//
+//        for (int i = 0; i < nIterations; i++) {
+//            gsl_matrix_set(mm, i, i, alpha[i]);
+//        }
+//
+//        for (int i = 1; i < nIterations; i++) {
+//            gsl_matrix_set(mm, i - 1, i, beta[i - 1]);
+//            gsl_matrix_set(mm, i, i - 1, beta[i - 1]);
+//        }
+//
+//        gsl_vector *eval = gsl_vector_alloc(nIterations);
+//        gsl_matrix *evec = gsl_matrix_alloc(nIterations, nIterations);
+//
+//        gsl_eigen_symmv_workspace *w =
+//                gsl_eigen_symmv_alloc(nIterations);
+//
+//        gsl_eigen_symmv(mm, eval, evec, w);
+//        gsl_eigen_symmv_free(w);
+//        gsl_eigen_symmv_sort(eval, evec, GSL_EIGEN_SORT_VAL_ASC);
+//        
+//
+//        double* d = new double[nIterations];
+//        for (int i = 0; i < nIterations; i++)
+//            d[i] = gsl_vector_get(eval, i);
+//        gsl_matrix_free(mm);
+//
+//        printf("Eigenvalue = %g\n", d[0]);
+//        // ------------ SolverTriDiagonal end
+//
+//        printf("Difference %e - %e = %e\n", d[0], dold, fabs(d[0] - dold));
+//        if (j > 5) {
+//            if ((fabs(d[0] - dold) < convCrit)) {
+//                break;
+//            }
+//        }
+//        dold = d[0];
+//        delete(d);
+//        time2 = timeInSec();
+//        printf("Iteration time in sec %f\n", (time2 - time1));
+//
+//    }
+//    delete(c);
+//    delete(q);
+//    delete(alpha);
+//    delete(beta);
+//    //    return 0;
+//}
 
 void setupMatrix() {
     double time1, time2;
