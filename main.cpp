@@ -218,7 +218,7 @@ void printConfig() {
     uint64_t tmp_nstatesdo=nStatesPerSpin(nsites, nedo);
 
     cout << "Estimated memory footprint: "<< 
-            (double(4)*double(tmp_nstates)
+            (double(3)*double(tmp_nstates)
             + double(tmp_nstatesup)*double(tmp_nstatesup)
             + double(tmp_nstatesup)*double(tmp_nstatesup))*double(4)
             /double(1024)/double(1024.0)/double(1024.0)<<" GB"<<endl;
@@ -273,7 +273,7 @@ void setupBasis(uint64_t*& basis, uint64_t nsites, uint64_t nelec) {
         }
     }
 //    printf("set up %ld states\n", n);
-    cout << "set up " <<n<< "states"<< endl;
+    cout << "set up " <<n<< " states"<< endl;
 }
 
 // matrixelementU
