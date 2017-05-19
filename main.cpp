@@ -218,9 +218,7 @@ void printConfig() {
     uint64_t tmp_nstatesdo=nStatesPerSpin(nsites, nedo);
 
     cout << "Estimated memory footprint: "<< 
-            (double(3)*double(tmp_nstates)
-            + double(tmp_nstatesup)*double(tmp_nstatesup)
-            + double(tmp_nstatesup)*double(tmp_nstatesup))*double(8)
+            (double(3)*double(tmp_nstates))*double(8)
             /double(1000)/double(1000.0)/double(1000.0)<<" GB"<<endl;
     cout << "--------------------------------------------------------" << endl; 
     // /double(1000000000.0)
