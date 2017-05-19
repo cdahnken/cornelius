@@ -189,9 +189,9 @@ uint64_t nStatesPerSpin(uint64_t nsites, uint64_t nelec) {
 }
 
 void printConfig() {
-    cout << "--------------------------------------------------------" << endl; 
+    cout << "////////////////////////////////////////////////////////" << endl; 
     cout << "                       CORNELIUS                        " << endl;
-    cout << "--------------------------------------------------------" << endl; 
+    cout << "////////////////////////////////////////////////////////" << endl; 
     cout << "Number of sites            : " << nsites << endl;
     cout << "Number of up electrons     : " << neup << endl;
     cout << "Number of down electrons   : " << nedo << endl;
@@ -220,8 +220,8 @@ void printConfig() {
     cout << "Estimated memory footprint: "<< 
             (double(3)*double(tmp_nstates)
             + double(tmp_nstatesup)*double(tmp_nstatesup)
-            + double(tmp_nstatesup)*double(tmp_nstatesup))*double(4)
-            /double(1024)/double(1024.0)/double(1024.0)<<" GB"<<endl;
+            + double(tmp_nstatesup)*double(tmp_nstatesup))*double(8)
+            /double(1000)/double(1000.0)/double(1000.0)<<" GB"<<endl;
     cout << "--------------------------------------------------------" << endl; 
     // /double(1000000000.0)
 }
@@ -1092,14 +1092,14 @@ void init() {
     setupMatrix();
 }
 #ifdef _SPARSE_
-void printsparsematrix(){
-    for(int i=0;i<nstatesup;i++){
-        for(int n=0;n<sparse_nup[i];n++){
-            printf("%d %d %f \n",i,sparse_pcup[i][n],sparse_pvup[i][n]);
-        } 
-    }
-
-}
+//void printsparsematrix(){
+//    for(int i=0;i<nstatesup;i++){
+//        for(int n=0;n<sparse_nup[i];n++){
+//            printf("%d %d %f \n",i,sparse_pcup[i][n],sparse_pvup[i][n]);
+//        } 
+//    }
+//
+//}
 #endif
 /*
  *
@@ -1108,7 +1108,7 @@ int main(int argc, char** argv) {
 
     readConfigFromFile(argv[1]);
     printConfig();
-    printf("blockup = %ld\n", blockup);
+//    printf("blockup = %ld\n", blockup);
     init();
 //    printsparsematrix();
     lanczos2();
