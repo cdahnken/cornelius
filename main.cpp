@@ -69,6 +69,7 @@
 #include <iostream>
 #include <fstream>
 #include <inttypes.h>
+#include <complex>
 
 // number of sites
 uint64_t nsites = 12;
@@ -116,6 +117,8 @@ double* mu_up;
 double* mu_do;
 // interaction for each site
 double* interaction;
+double gse;
+double* phi;
 
 #ifdef _SPARSE_
 // how many values are in a given row?
@@ -134,7 +137,7 @@ uint64_t** sparse_pcdo;
 //double* sparse_vbuffer;
 //uint64_t* sparse_cbuffer;
 
-uint64_t sparse_buffersize=500;
+uint64_t sparse_buffersize = 500;
 
 #endif
 
@@ -144,6 +147,7 @@ using namespace std;
 
 // Read in the configuration file and set up 
 // the arrays.
+
 void readConfigFromFile(char* filename) {
     ifstream cfile(filename);
     // read line 1 - number of sites
@@ -175,6 +179,7 @@ void readConfigFromFile(char* filename) {
 }
 
 // Faculty function - uint64_t type should suffice
+
 uint64_t faculty(uint64_t i) {
     if (i == 1 || i == 0) {
         return 1;
@@ -184,43 +189,44 @@ uint64_t faculty(uint64_t i) {
 }
 
 // Compute the number of states per spin
+
 uint64_t nStatesPerSpin(uint64_t nsites, uint64_t nelec) {
     return faculty(nsites) / faculty(nelec) / faculty(nsites - nelec);
 }
 
 void printConfig() {
-    cout << "////////////////////////////////////////////////////////" << endl; 
+    cout << "////////////////////////////////////////////////////////" << endl;
     cout << "                       CORNELIUS                        " << endl;
-    cout << "////////////////////////////////////////////////////////" << endl; 
+    cout << "////////////////////////////////////////////////////////" << endl;
     cout << "Number of sites            : " << nsites << endl;
     cout << "Number of up electrons     : " << neup << endl;
     cout << "Number of down electrons   : " << nedo << endl;
     cout << "Number of hoppings         : " << nhoppings << endl;
     for (uint64_t i = 0; i < nhoppings; i++) {
-        cout << "hopping " << i << " \t: " 
-                << hopping[i][0] << " " << hopping[i][1] 
+        cout << "hopping " << i << " \t: "
+                << hopping[i][0] << " " << hopping[i][1]
                 << " " << hoppingvalue[i] << endl;
     }
     for (uint64_t i = 0; i < nsites; i++) {
-        cout << "interaction/mu_up/mu_down " 
-                << i << "\t: " << interaction[i] << " " 
+        cout << "interaction/mu_up/mu_down "
+                << i << "\t: " << interaction[i] << " "
                 << mu_up[i] << " " << mu_do[i] << endl;
     }
-    cout << "Size of up hopping matrix  : " 
+    cout << "Size of up hopping matrix  : "
             << nStatesPerSpin(nsites, neup) << endl;
-    cout << "Size of down hopping matrix: " << nStatesPerSpin(nsites, nedo) 
+    cout << "Size of down hopping matrix: " << nStatesPerSpin(nsites, nedo)
             << endl;
-    cout << "Size of diagonal matrix    : " 
-            << nStatesPerSpin(nsites, neup)*nStatesPerSpin(nsites, nedo) 
+    cout << "Size of diagonal matrix    : "
+            << nStatesPerSpin(nsites, neup) * nStatesPerSpin(nsites, nedo)
             << endl;
-    uint64_t tmp_nstates=nStatesPerSpin(nsites, neup)*nStatesPerSpin(nsites, nedo);
-    uint64_t tmp_nstatesup=nStatesPerSpin(nsites, neup);
-    uint64_t tmp_nstatesdo=nStatesPerSpin(nsites, nedo);
+    uint64_t tmp_nstates = nStatesPerSpin(nsites, neup) * nStatesPerSpin(nsites, nedo);
+    uint64_t tmp_nstatesup = nStatesPerSpin(nsites, neup);
+    uint64_t tmp_nstatesdo = nStatesPerSpin(nsites, nedo);
 
-    cout << "Estimated memory footprint: "<< 
-            (double(3)*double(tmp_nstates))*double(8)
-            /double(1000)/double(1000.0)/double(1000.0)<<" GB"<<endl;
-    cout << "--------------------------------------------------------" << endl; 
+    cout << "Estimated memory footprint: " <<
+            (double(3) * double(tmp_nstates)) * double(8)
+            / double(1000) / double(1000.0) / double(1000.0) << " GB" << endl;
+    cout << "--------------------------------------------------------" << endl;
     // /double(1000000000.0)
 }
 
@@ -233,17 +239,18 @@ void printState(uint64_t s, uint64_t ns) {
             printf("1");
         }
     }
-//    printf("\n");
+    //    printf("\n");
 }
 
 double timeInSec(void) {
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    return (double) ((tv.tv_sec * 1000 + tv.tv_usec / 1000.0))/1000.0;
+    return (double) ((tv.tv_sec * 1000 + tv.tv_usec / 1000.0)) / 1000.0;
 }
 
 // getBitAt
 // Get a bit in an integer
+
 uint64_t inline getBitAt(uint64_t st, uint64_t pos) {
     return ((st & (1 << pos)) >> pos);
 }
@@ -252,6 +259,7 @@ uint64_t inline getBitAt(uint64_t st, uint64_t pos) {
 // Sum all the bits in an integer.
 // This is offloaded to an intrinsic function calling
 // the respective assembly instruction.
+
 uint64_t inline popcount(uint64_t i) {
     return __builtin_popcount(i);
 }
@@ -260,6 +268,7 @@ uint64_t inline popcount(uint64_t i) {
 // Fills an arrays with numbers between 0 and 2^L-1
 // having nelec number of bits (which correspond to 
 // electrons).
+
 void setupBasis(uint64_t*& basis, uint64_t nsites, uint64_t nelec) {
     uint64_t bmin = (1 << nelec) - 1;
     uint64_t bmax = bmin << (nsites - nelec);
@@ -270,8 +279,8 @@ void setupBasis(uint64_t*& basis, uint64_t nsites, uint64_t nelec) {
             n++;
         }
     }
-//    printf("set up %ld states\n", n);
-    cout << "set up " <<n<< " states"<< endl;
+    //    printf("set up %ld states\n", n);
+    cout << "set up " << n << " states" << endl;
 }
 
 // matrixelementU
@@ -279,6 +288,7 @@ void setupBasis(uint64_t*& basis, uint64_t nsites, uint64_t nelec) {
 // up and down states u and d. 
 // This can be done a lot quicker, but has not been a 
 // bottle neck at this time.
+
 double matrixelementU(uint64_t u, uint64_t d) {
     double ret = 0;
     for (uint64_t i = 0; i < nsites; i++)
@@ -469,6 +479,7 @@ void QPlusHTimesC1(double* &q, double* &c) {
 }
 
 // exploiting spin symmetry
+
 void QPlusHTimesC2(double* &q, double* &c) {
 #pragma omp parallel for
     for (uint64_t i = 0; i < nstatesup; i++) {
@@ -516,14 +527,14 @@ void QPlusHTimesC3(double* &q, double* &c) {
         for (uint64_t j = 0; j < nstatesdo; j++) {
             uint64_t p = i * nstatesup + j;
             double m = 0;
-//            for (uint64_t k = 0; k < nstatesup; k++) {
-//                uint64_t n = k * nstatesup + j;
-//                m += mup[i][k] * c[n];
-//            }
-            for(uint64_t n=0;n<sparse_nup[i];n++){
-                m+=sparse_pvup[i][n]*c[sparse_pcup[i][n]*nstatesup+j];
-//                printf("%d %d %d %f\n",i,j,sparse_pvup[i][n],sparse_pcup[i][n]);
-            }    
+            //            for (uint64_t k = 0; k < nstatesup; k++) {
+            //                uint64_t n = k * nstatesup + j;
+            //                m += mup[i][k] * c[n];
+            //            }
+            for (uint64_t n = 0; n < sparse_nup[i]; n++) {
+                m += sparse_pvup[i][n] * c[sparse_pcup[i][n] * nstatesup + j];
+                //                printf("%d %d %d %f\n",i,j,sparse_pvup[i][n],sparse_pcup[i][n]);
+            }
             q[p] += m;
         }
     }
@@ -537,32 +548,32 @@ void QPlusHTimesC3(double* &q, double* &c) {
         for (uint64_t i = 0; i < nstatesup; i++) {
             uint64_t p = i * nstatesup + j;
             double m = 0;
-//            for (uint64_t l = 0; l < nstatesdo; l++) {
-//                int n = i * nstatesup + l;
-//                m += mdo[j][l] * c[n];
-//            }
-            for(uint64_t n=0;n<sparse_nup[j];n++){
-                m+=sparse_pvdo[j][n]*c[i*nstatesup+sparse_pcdo[j][n]];
-            }                
+            //            for (uint64_t l = 0; l < nstatesdo; l++) {
+            //                int n = i * nstatesup + l;
+            //                m += mdo[j][l] * c[n];
+            //            }
+            for (uint64_t n = 0; n < sparse_nup[j]; n++) {
+                m += sparse_pvdo[j][n] * c[i * nstatesup + sparse_pcdo[j][n]];
+            }
             q[p] += m;
         }
     }
     time2 = timeInSec();
     printf("%f\n", time2 - time1);
 
-//    printf("MatVec Diagonal: ");
-//    time1 = timeInSec();
-//#pragma omp parallel for
-//    for (uint64_t i = 0; i < nstatesup; i++) {
-//        for (uint64_t j = 0; j < nstatesdo; j++) {
-//            uint64_t p = i * nstatesup + j;
-//            double m = 0;
-//            m += mdia[p] * c[p];
-//            q[p] += m;
-//        }
-//    }
-//    time2 = timeInSec();
-//    printf("%ld\n", time2 - time1);
+    //    printf("MatVec Diagonal: ");
+    //    time1 = timeInSec();
+    //#pragma omp parallel for
+    //    for (uint64_t i = 0; i < nstatesup; i++) {
+    //        for (uint64_t j = 0; j < nstatesdo; j++) {
+    //            uint64_t p = i * nstatesup + j;
+    //            double m = 0;
+    //            m += mdia[p] * c[p];
+    //            q[p] += m;
+    //        }
+    //    }
+    //    time2 = timeInSec();
+    //    printf("%ld\n", time2 - time1);
 #else
     printf("MatVec Hopping Up: ");
     time1 = timeInSec();
@@ -598,19 +609,19 @@ void QPlusHTimesC3(double* &q, double* &c) {
     time2 = timeInSec();
     printf("%f\n", time2 - time1);
 
-//    printf("MatVec Diagonal: ");
-//    time1 = timeInSec();
-//#pragma omp parallel for
-//    for (uint64_t i = 0; i < nstatesup; i++) {
-//        for (uint64_t j = 0; j < nstatesdo; j++) {
-//            uint64_t p = i * nstatesup + j;
-//            double m = 0;
-//            m += mdia[p] * c[p];
-//            q[p] += m;
-//        }
-//    }
-//    time2 = timeInSec();
-//    printf("%f\n", time2 - time1);
+    //    printf("MatVec Diagonal: ");
+    //    time1 = timeInSec();
+    //#pragma omp parallel for
+    //    for (uint64_t i = 0; i < nstatesup; i++) {
+    //        for (uint64_t j = 0; j < nstatesdo; j++) {
+    //            uint64_t p = i * nstatesup + j;
+    //            double m = 0;
+    //            m += mdia[p] * c[p];
+    //            q[p] += m;
+    //        }
+    //    }
+    //    time2 = timeInSec();
+    //    printf("%f\n", time2 - time1);
 #endif
     printf("MatVec Diagonal: ");
     time1 = timeInSec();
@@ -695,51 +706,50 @@ void QPlusHTimesC3(double* &q, double* &c) {
 // There is much to be optimized around this function, but since 
 // this is only of dimension nIterations, we don't care.
 
-void solvetridiag(double &gse, double* &gsv, double* &alpha, double* &beta, int nIterations){
-        gsl_matrix *mm = gsl_matrix_alloc(nIterations, nIterations);
+void solvetridiag(double &gse, double* &gsv, double* &alpha, double* &beta, int nIterations) {
+    gsl_matrix *mm = gsl_matrix_alloc(nIterations, nIterations);
 
-        for (int i = 0; i < nIterations; i++) {
-            for (int j = 0; j < nIterations; j++) {
-                gsl_matrix_set(mm, i, j, 0);
-            }
+    for (int i = 0; i < nIterations; i++) {
+        for (int j = 0; j < nIterations; j++) {
+            gsl_matrix_set(mm, i, j, 0);
         }
+    }
 
-        for (int i = 0; i < nIterations; i++) {
-            gsl_matrix_set(mm, i, i, alpha[i]);
-        }
+    for (int i = 0; i < nIterations; i++) {
+        gsl_matrix_set(mm, i, i, alpha[i]);
+    }
 
-        for (int i = 1; i < nIterations; i++) {
-            gsl_matrix_set(mm, i - 1, i, beta[i - 1]);
-            gsl_matrix_set(mm, i, i - 1, beta[i - 1]);
-        }
+    for (int i = 1; i < nIterations; i++) {
+        gsl_matrix_set(mm, i - 1, i, beta[i - 1]);
+        gsl_matrix_set(mm, i, i - 1, beta[i - 1]);
+    }
 
-        gsl_vector *eval = gsl_vector_alloc(nIterations);
-        gsl_matrix *evec = gsl_matrix_alloc(nIterations, nIterations);
+    gsl_vector *eval = gsl_vector_alloc(nIterations);
+    gsl_matrix *evec = gsl_matrix_alloc(nIterations, nIterations);
 
-        gsl_eigen_symmv_workspace *w =
-                gsl_eigen_symmv_alloc(nIterations);
+    gsl_eigen_symmv_workspace *w =
+            gsl_eigen_symmv_alloc(nIterations);
 
-        gsl_eigen_symmv(mm, eval, evec, w);
-        gsl_eigen_symmv_free(w);
-        gsl_eigen_symmv_sort(eval, evec, GSL_EIGEN_SORT_VAL_ASC);
-        
+    gsl_eigen_symmv(mm, eval, evec, w);
+    gsl_eigen_symmv_free(w);
+    gsl_eigen_symmv_sort(eval, evec, GSL_EIGEN_SORT_VAL_ASC);
 
-        double* d = new double[nIterations];
-//        for (int i = 0; i < nIterations; i++)
-//            d[i] = gsl_vector_get(eval, i);
-        gse=gsl_vector_get(eval,0);
-//        gsl_vector_view v= gsl_matrix_column(evec,0);
-        for(int i=0;i< nIterations;i++)
-            gsv[i]=gsl_matrix_get(evec,0,i);
-        gsl_matrix_free(mm);
-        printf("Eigenvalue = %g\n", gse);
-        // ------------ SolverTriDiagonal end
-        gsl_vector_free(eval);
-        gsl_matrix_free(evec);
-        delete(d);
+
+    double* d = new double[nIterations];
+    //        for (int i = 0; i < nIterations; i++)
+    //            d[i] = gsl_vector_get(eval, i);
+    gse = gsl_vector_get(eval, 0);
+    //        gsl_vector_view v= gsl_matrix_column(evec,0);
+    for (int i = 0; i < nIterations; i++)
+        gsv[i] = gsl_matrix_get(evec, i, 0);
+    gsl_matrix_free(mm);
+    printf("Eigenvalue = %g\n", gse);
+    // ------------ SolverTriDiagonal end
+    gsl_vector_free(eval);
+    gsl_matrix_free(evec);
+    delete(d);
 
 }
-
 
 void lanczos2() {
     int j;
@@ -754,7 +764,7 @@ void lanczos2() {
     c = new double[nstates];
     q = new double[nstates];
     double time1, time2;
-    
+
 #pragma omp parallel for
     for (uint64_t i = 0; i < nstates; i++) {
         c[i] = 1.0 / sqrt((double) nstates);
@@ -797,18 +807,18 @@ void lanczos2() {
         printf("beta[%d]=%e\n", j, beta[j]);
 
         // ------------ SolverTriDiagonal begin
-        evec=new double[nIterations];
-        solvetridiag(dnew,evec,alpha,beta,nIterations);
+        evec = new double[nIterations];
+        solvetridiag(dnew, evec, alpha, beta, nIterations);
         // -------------- Tridiag solver end
         printf("Difference %e - %e = %e\n", dnew, dold, fabs(dnew - dold));
         if (j > 5) {
             if ((fabs(dnew - dold) < convCrit)) {
                 break;
             }
-            dold=dnew;
+            dold = dnew;
             free(evec);
         }
-        
+
         time2 = timeInSec();
         printf("Iteration time in sec %f\n", (time2 - time1));
 
@@ -817,10 +827,140 @@ void lanczos2() {
     delete(q);
     delete(alpha);
     delete(beta);
-    //    return 0;
 }
 
+// lanczos3
+// Lanczos iteration + ground state computation
+// This requires 2 turns of the iteration process, where 
+// we don't compute the tridiag matrix during the last
+// iteration.
 
+int LCZ_COMPUTE_GROUDSTATE = 1;
+int LCZ_COMPUTE_GSENERGY = 0;
+
+void lanczos3(int comp_gsv) {
+    int j;
+    int nIterations = 0;
+    double* c;
+    double* q;
+    //    double* phi;
+    double dnew;
+    double* evec;
+    double dold = 10e+300;
+    double* beta = new double[maxiter];
+    double* alpha = new double[maxiter];
+
+    c = new double[nstates];
+    q = new double[nstates];
+    if (comp_gsv == LCZ_COMPUTE_GROUDSTATE) {
+        phi = new double[nstates];
+    }
+    double time1, time2;
+
+
+    for (int turn = 0; turn < (comp_gsv + 1); turn++) {
+#pragma omp parallel for
+        for (uint64_t i = 0; i < nstates; i++) {
+            c[i] = 1.0 / sqrt((double) nstates);
+            q[i] = 0;
+        }
+        // only initialize phi in the second turn
+        if (turn == 1) {
+#pragma omp parallel for
+            for (uint64_t i = 0; i < nstates; i++) {
+                phi[i] = 0;
+            }
+        }
+        beta[0] = 0;
+        j = 0;
+
+        for (int n = 0; n < maxiter - 1; n++) {
+            time1 = timeInSec();
+
+            if (j != 0) {
+#pragma omp parallel for
+                for (uint64_t i = 0; i < nstates; i++) {
+                    double t = c[i];
+                    c[i] = q[i] / beta[j];
+                    q[i] = -beta[j] * t;
+                }
+            }
+            QPlusHTimesC3(q, c);
+            j++;
+
+            double tmp = 0;
+#pragma omp parallel for reduction(+:tmp)
+            for (uint64_t i = 0; i < nstates; i++) {
+                tmp += c[i] * q[i];
+            }
+            alpha[j] = tmp;
+#pragma omp parallel for
+            for (uint64_t i = 0; i < nstates; i++) {
+                q[i] = q[i] - alpha[j] * c[i];
+            }
+            // only do this in the second turn if gsv computation is configured
+            if (turn == 1) {
+#pragma omp parallel for
+                for (uint64_t i = 0; i < nstates; i++) {
+                    phi[i] = phi[i] - evec[j] * c[i];
+                }
+            }
+
+            tmp = 0;
+#pragma omp parallel for reduction(+:tmp)
+            for (uint64_t i = 0; i < nstates; i++) {
+                tmp += q[i] * q[i];
+            }
+            beta[j] = sqrt(tmp);
+            nIterations = j;
+            for (int i = 0; i < j; i++)
+                cout << alpha[i] << " ";
+            cout << endl;
+            for (int i = 0; i < j; i++)
+                cout << beta[i] << " ";
+            cout << endl;
+            printf("beta[%d]=%e\n", j, beta[j]);
+            if (turn == 0) {
+                // ------------ SolverTriDiagonal begin
+                evec = new double[nIterations];
+                solvetridiag(dnew, evec, alpha, beta, nIterations);
+                for (int i = 0; i < j; i++)
+                    cout << evec[i] << " ";
+                cout << endl;
+                // -------------- Tridiag solver end
+                printf("Difference %e - %e = %e\n", dnew, dold, fabs(dnew - dold));
+                if (j > 5) {
+                    if ((fabs(dnew - dold) < convCrit)) {
+                        maxiter = j + 1;
+                        gse = dnew;
+                        break;
+                    }
+                    dold = dnew;
+                    free(evec);
+                }
+            }
+
+            time2 = timeInSec();
+            printf("Iteration time in sec %f\n", (time2 - time1));
+        }
+    }
+    double tmp = 0;
+    if (comp_gsv = LCZ_COMPUTE_GROUDSTATE) {
+#pragma omp parallel for reduction(+:tmp)
+        for (uint64_t i = 0; i < nstates; i++) {
+            tmp += phi[i] * phi[i];
+        }
+        tmp = 1.0 / sqrt(tmp);
+#pragma omp parallel for firstprivate(tmp)
+        for (uint64_t i = 0; i < nstates; i++) {
+            tmp += phi[i] * tmp;
+        }
+    }
+    delete(c);
+    delete(q);
+    delete(alpha);
+    delete(beta);
+}
 
 //void lanczos() {
 //    int j;
@@ -946,37 +1086,37 @@ void setupMatrix() {
             int n = 0;
             for (uint64_t k = 0; k < nstatesup; k++) {
                 double m = matrixelementT(sup[i], sup[k]);
-//                printf("%f ", m);
-                if (m != 0.0e+0) {                   
+                //                printf("%f ", m);
+                if (m != 0.0e+0) {
                     sparse_cbuffer[n] = k;
-//                    sparse_cbuffer[n] = i * nstatesup + k;
+                    //                    sparse_cbuffer[n] = i * nstatesup + k;
                     sparse_vbuffer[n] = m;
-//                    printf("%d %d %d %f \n",i,k,n,m);
+                    //                    printf("%d %d %d %f \n",i,k,n,m);
                     n++;
                 }
             }
-//            printf("\n");
+            //            printf("\n");
             sparse_nup[i] = n;
             sparse_pcup[i] = new uint64_t[n];
             sparse_pvup[i] = new double[n];
             for (int r = 0; r < n; r++) {
                 sparse_pcup[i][r] = sparse_cbuffer[r];
                 sparse_pvup[i][r] = sparse_vbuffer[r];
-//                printf("%d %d %f \n",i,sparse_cbuffer[r],sparse_vbuffer[r]);
-//                printf("%d %d %f \n",i,sparse_pcup[i][r],sparse_pvup[i][r]);
-//                printf("\n");
+                //                printf("%d %d %f \n",i,sparse_cbuffer[r],sparse_vbuffer[r]);
+                //                printf("%d %d %f \n",i,sparse_pcup[i][r],sparse_pvup[i][r]);
+                //                printf("\n");
             }
         }
 
 #pragma omp for
         for (uint64_t j = 0; j < nstatesdo; j++) {
-//            double* sparse_vbuffer = new double[sparse_buffersize];
-//            uint64_t* sparse_cbuffer = new uint64_t[sparse_buffersize];
+            //            double* sparse_vbuffer = new double[sparse_buffersize];
+            //            uint64_t* sparse_cbuffer = new uint64_t[sparse_buffersize];
             int n = 0;
             for (uint64_t l = 0; l < nstatesdo; l++) {
                 double m = matrixelementT(sdo[j], sdo[l]);
                 if (m != 0.0e+0) {
-//                    sparse_cbuffer[n] = j*nstatesup+l;
+                    //                    sparse_cbuffer[n] = j*nstatesup+l;
                     sparse_cbuffer[n] = l;
                     sparse_vbuffer[n] = m;
                     n++;
@@ -993,7 +1133,7 @@ void setupMatrix() {
 #pragma omp for
         for (uint64_t i = 0; i < nstatesup; i++) {
             for (uint64_t j = 0; j < nstatesdo; j++) {
-//                int p = i * nstatesup + j;
+                //                int p = i * nstatesup + j;
                 uint64_t p = i * nstatesdo + j;
                 mdia[p] = matrixelementU(sup[i], sdo[j]);
                 mdia[p] += matrixelementMu(sup[i], sdo[j]);
@@ -1005,23 +1145,23 @@ void setupMatrix() {
     for (uint64_t i = 0; i < nstatesup; i++) {
         for (uint64_t k = 0; k < nstatesup; k++) {
             mup[i][k] = matrixelementT(sup[i], sup[k]);
-//            if(mup[i][k]!=0.0e+0){
-//                printState(sup[i],nsites);
-//                printf(" ");
-//                printState(sup[k],nsites);
-//                printf(" ");
-//                printState(sup[i]^sup[k],nsites);
-//                printf(" %f\n",mup[i][k]);
-//            }
+            //            if(mup[i][k]!=0.0e+0){
+            //                printState(sup[i],nsites);
+            //                printf(" ");
+            //                printState(sup[k],nsites);
+            //                printf(" ");
+            //                printState(sup[i]^sup[k],nsites);
+            //                printf(" %f\n",mup[i][k]);
+            //            }
         }
     }
 #pragma omp parallel for
     for (uint64_t j = 0; j < nstatesdo; j++) {
         for (uint64_t l = 0; l < nstatesdo; l++) {
             mdo[j][l] = matrixelementT(sdo[j], sdo[l]);
-//            if(mdo[j][l]!=0.0e+0){
-//                printf("%ld %ld %f\n",j,l,mdo[j][l]);
-//            }
+            //            if(mdo[j][l]!=0.0e+0){
+            //                printf("%ld %ld %f\n",j,l,mdo[j][l]);
+            //            }
         }
     }
 #pragma omp parallel for
@@ -1045,7 +1185,7 @@ void setupMatrix() {
     //        }
     //        printf("\n");
     //    }
-    
+
 #endif
     time2 = timeInSec();
     printf("Setup: %f\n", time2 - time1);
@@ -1071,14 +1211,14 @@ void init() {
     mup = new double*[nstatesup];
     mdo = new double*[nstatesdo];
 #endif
-    
+
     mdia = new double[nstates];
 
     setupBasis(sup, nsites, neup);
     setupBasis(sdo, nsites, nedo);
 
 #ifdef _SPARSE_
-// nothing to do here  
+    // nothing to do here  
 #else
     for (int i = 0; i < nstatesup; i++) {
         mup[i] = new double[nstatesup];
@@ -1099,17 +1239,57 @@ void init() {
 //
 //}
 #endif
+
+//void greenii(complex<double> z){
+//    complex<double> tmp = -beta[maxiter-1]*beta[maxiter-1]/(z-alpha[maxiter-1]);
+//    for(int i=maxiter-2; i>1;i--){
+//        tmp+=-beta[i]*beta[i]/(z-alpha[i]+tmp);
+//    }
+//    return tmp;
+//}
+
+
+void measure() {
+    double doubleocc=0;
+    double sz2=0;
+#pragma omp parallel for reduction(+:doubleocc) reduction(+:sz2)
+    for(uint64_t i=0;i<nstatesup;i++){
+        int k=i*nstatesdo;
+        for(uint64_t j=0;j<nstatesup;j++){
+            doubleocc+=double(__builtin_popcount(sup[i]&sdo[j]))*phi[k+j]*phi[k+j];
+            sz2+=double(__builtin_popcount(sup[i]^sdo[j]))*phi[k+j]*phi[k+j];
+        }
+    }
+    cout<<"double occupation = "<<doubleocc<<endl;
+    cout<<"z spin squared    = "<<sz2<<endl;
+}
+
 /*
  *
  */
 int main(int argc, char** argv) {
+    string parfile = argv[1];
+    string gsefile = parfile + ".gse";
+    string gsvfile = parfile + ".gsv";
 
     readConfigFromFile(argv[1]);
     printConfig();
-//    printf("blockup = %ld\n", blockup);
+    //    printf("blockup = %ld\n", blockup);
     init();
-//    printsparsematrix();
-    lanczos2();
+    //    printsparsematrix();
+    //    lanczos2();
+    lanczos3(LCZ_COMPUTE_GROUDSTATE);
+
+    measure();
+
+    ofstream cfile(gsefile.data());
+    cfile << gse << endl;
+    cfile.close();
+    //    cfile.open(gsvfile.data());
+    //    for(int i=0;i<nstates;i++){
+    //        cfile<<phi[i]<<endl;
+    //    }
+    //    cfile.close();
     return (EXIT_SUCCESS);
 }
 
